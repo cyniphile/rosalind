@@ -3,5 +3,19 @@
 version = 3
 
 [[package]]
+name = "bio-lib"
+version = "0.1.0"
+
+[[package]]
 name = "p1"
 version = "0.1.0"
+dependencies = [
+ "bio-lib",
+]
+
+[[package]]
+name = "p2"
+version = "0.1.0"
+dependencies = [
+ "bio-lib",
+]
