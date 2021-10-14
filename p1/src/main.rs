@@ -41,13 +41,15 @@ fn main() {
 
 #[cfg(test)]
 mod tests {
-    use crate::get_base_counts;
+    use crate::{get_base_counts, get_base_counts_functional};
 
     #[test]
     fn test() {
         let seq =
             "AGCTTTTCATTCTGACTGCAACGGGCAATATGTCTCTGTGTGGATTAAAAAAAGAGTGTCTGATAGCAGC".to_string();
         let answer = get_base_counts(&seq);
+        assert_eq!(answer, [20, 12, 17, 21]);
+        let answer = get_base_counts_functional(&seq);
         assert_eq!(answer, [20, 12, 17, 21]);
     }
 }
