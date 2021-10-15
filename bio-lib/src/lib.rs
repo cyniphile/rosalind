@@ -15,6 +15,33 @@ pub fn get_dna_base_complement(base: char) -> char {
     }
 }
 
+pub fn hamming_distance(seq1: &String, seq2: &String) -> i32 {
+    assert_eq!(
+        seq1.len(),
+        seq2.len(),
+        "This implementation of Hamming distance only works for strings of equal size."
+    );
+    let mut dist = 0;
+    for (x, y) in seq1.chars().zip(seq2.chars()) {
+        if x != y {
+            dist += 1;
+        }
+    }
+    dist
+}
+
+pub fn hamming_distance_functional(seq1: &String, seq2: &String) -> i32 {
+    assert_eq!(
+        seq1.len(),
+        seq2.len(),
+        "This implementation of Hamming distance only works 
+        for strings of equal size."
+    );
+    seq1.chars()
+        .zip(seq2.chars())
+        .fold(0, |acc, (x, y)| if x != y { acc + 1 } else { acc })
+}
+
 fn translate_codon_to_amino_acid(codon: &[u8]) -> char {
     match codon {
         b"UUU" => 'F',
@@ -109,6 +136,8 @@ pub fn reverse_complement_dna(dna_seq: &String) -> String {
 
 #[cfg(test)]
 mod tests {
+    use crate::hamming_distance;
+    use crate::hamming_distance_functional;
     use crate::reverse_complement_dna;
     use crate::transcribe_dna_to_rna;
     use crate::translate_rna_to_amino_acids;
@@ -132,5 +161,15 @@ mod tests {
         let seq = "AAAACCCGGT".to_string();
         let answer = reverse_complement_dna(&seq);
         assert_eq!(answer, "ACCGGGTTTT");
+    }
+
+    #[test]
+    fn test_hamming_distance() {
+        let seq1 = "GAGCCTACTAACGGGAT".to_string();
+        let seq2 = "CATCGTAATGACGGCCT".to_string();
+        let answer = hamming_distance(&seq1, &seq2);
+        assert_eq!(answer, 7);
+        let answer = hamming_distance_functional(&seq1, &seq2);
+        assert_eq!(answer, 7);
     }
 }

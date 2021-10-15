@@ -1,23 +1,25 @@
 use bio_lib::read_base_string_file;
-use num::integer::binomial;
 
 fn get_prob_dominant_phenotype(n_homo_dom: i32, n_hetero: i32, n_homo_recess: i32) -> f32 {
     let n_homo_dom = n_homo_dom as f32;
     let n_hetero = n_hetero as f32;
     let n_homo_recess = n_homo_recess as f32;
     let population = n_homo_dom + n_hetero + n_homo_recess;
-    let choices = binomial(population as i32, 2) as f32;
-    let combs_homo_dom = n_homo_dom * (n_homo_dom - 1.0) / 2.0;
+    // divide by 2 here and below because we don't care about order
+    //TODO: try optimizing by using bitshifting 
+    let all_choices = population * (population - 1.0) / 2.0;
+    let combs_homo_dom = n_homo_dom * (n_homo_dom - 1.0) / 2.0; 
     let other_combs_homo_dom = n_homo_dom * (population - n_homo_dom);
     let combs_hetero_hetero = n_hetero * (n_hetero - 1.0) / 2.0;
     let combs_hetero_recess = n_homo_recess * n_hetero;
     (
         combs_homo_dom
         + other_combs_homo_dom
-        + (combs_hetero_hetero * 3.0 / 4.0) // 3/4 is prob of getting non-homzygous recessive two hetero parents
+        // 3/4 = prob of getting non-homzygous recessive from two hetero parents
+        + (combs_hetero_hetero * 3.0 / 4.0) 
+        // 1/2 = prob of getting non-homzygous recessive from hetero/homo-recessive parents
         + (combs_hetero_recess / 2.0)
-        // 1/2 is prob of getting non-homzygous recessive hetero/homo-recessive parents
-    ) / choices
+    ) / all_choices
 }
 fn main() {
     let input = read_base_string_file("mendels1stlaw/rosalind_iprb.txt");
