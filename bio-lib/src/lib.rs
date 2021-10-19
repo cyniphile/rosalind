@@ -1,21 +1,91 @@
 use std::fs;
 
-pub fn read_base_string_file(path: &str) -> String {
-    let file = fs::read_to_string(path).expect("fuck");
-    file.to_uppercase().trim().to_string()
+enum DnaNucleotide {
+    A,
+    C,
+    G,
+    T,
+}
+enum RnaNucleotide {
+    A,
+    C,
+    G,
+    U,
 }
 
-pub fn get_dna_base_complement(base: char) -> char {
-    match base {
-        'A' => 'T',
-        'T' => 'A',
-        'G' => 'C',
-        'C' => 'G',
-        _ => panic!("Non-DNA base \"{}\" found.", base),
+trait Nucleotide {
+    fn get_base_complement(&self) -> Self;
+}
+
+impl Nucleotide for DnaNucleotide {
+    fn get_base_complement(&self) -> DnaNucleotide {
+        match self {
+            DnaNucleotide::A => DnaNucleotide::T,
+            DnaNucleotide::T => DnaNucleotide::A,
+            DnaNucleotide::C => DnaNucleotide::G,
+            DnaNucleotide::G => DnaNucleotide::C,
+        }
     }
 }
 
-pub fn hamming_distance(seq1: &String, seq2: &String) -> i32 {
+impl Nucleotide for RnaNucleotide {
+    fn get_base_complement(&self) -> RnaNucleotide {
+        match self {
+            RnaNucleotide::A => RnaNucleotide::U,
+            RnaNucleotide::U => RnaNucleotide::A,
+            RnaNucleotide::G => RnaNucleotide::C,
+            RnaNucleotide::C => RnaNucleotide::G,
+        }
+    }
+}
+
+type DNA = Vec<DnaNucleotide>;
+type RNA = Vec<RnaNucleotide>;
+
+enum NucleicAcid {
+    DNA,
+    RNA,
+}
+
+trait StringParsable {
+    fn char_parser(&self, base: char) -> DnaNucleotide;
+    fn parse(&self, seq: String) -> DNA {
+        seq.chars().map(|c| self.char_parser(c)).collect()
+    }
+}
+
+// TODO: make these bijective maps
+impl StringParsable for DNA {
+    fn char_parser(&self, base: char) -> DnaNucleotide {
+        match base {
+            'A' => DnaNucleotide::A,
+            'C' => DnaNucleotide::C,
+            'G' => DnaNucleotide::G,
+            'T' => DnaNucleotide::T,
+            _ => panic!("\"{}\" is not a recognized DNA base.", base),
+        }
+    }
+}
+
+impl StringParsable for RNA {
+    fn char_parser(&self, base: char) -> RnaNucleotide {
+        match base {
+            'A' => RnaNucleotide::A,
+            'C' => RnaNucleotide::C,
+            'G' => RnaNucleotide::G,
+            'U' => RnaNucleotide::U,
+            _ => panic!("\"{}\" is not a recognized DNA base.", base),
+        }
+    }
+}
+
+pub fn read_base_string_file<T: StringParsable>(path: &str, kind: T) -> NucleicAcid {
+    let file = fs::read_to_string(path).expect("Can't parse file to into a string.");
+    let seq = file.to_uppercase().trim().to_string();
+    kind.parse(seq)
+}
+
+pub fn hamming_distance(seq1: &str, seq2: &str) -> i32 {
     assert_eq!(
         seq1.len(),
         seq2.len(),
