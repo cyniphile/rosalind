@@ -17,6 +17,7 @@ trait Nucleotide {
     fn get_base_complement(&self) -> Self;
 }
 
+// TODO: is there exhaustivity checking for Bijective maps?
 impl Nucleotide for DnaNucleotide {
     fn get_base_complement(&self) -> DnaNucleotide {
         match self {
@@ -39,24 +40,22 @@ impl Nucleotide for RnaNucleotide {
     }
 }
 
-type DNA = Vec<DnaNucleotide>;
-type RNA = Vec<RnaNucleotide>;
+// TODO: Not sure how to use these derived types yet without impl FromIterator
+// type DNA = Vec<DnaNucleotide>;
+// type RNA = Vec<RnaNucleotide>;
 
-enum NucleicAcid {
-    DNA,
-    RNA,
-}
+// trait NucleicAcid {}
 
-trait StringParsable {
-    fn char_parser(&self, base: char) -> DnaNucleotide;
-    fn parse(&self, seq: String) -> DNA {
-        seq.chars().map(|c| self.char_parser(c)).collect()
-    }
+// impl NucleicAcid for DNA {}
+// impl NucleicAcid for DNA {}
+
+trait CharParsable {
+    fn parse_char(&self, base: char) -> Self;
 }
 
 // TODO: make these bijective maps
-impl StringParsable for DNA {
-    fn char_parser(&self, base: char) -> DnaNucleotide {
+impl CharParsable for DnaNucleotide {
+    fn parse_char(&self, base: char) -> DnaNucleotide {
         match base {
             'A' => DnaNucleotide::A,
             'C' => DnaNucleotide::C,
@@ -67,22 +66,26 @@ impl StringParsable for DNA {
     }
 }
 
-impl StringParsable for RNA {
-    fn char_parser(&self, base: char) -> RnaNucleotide {
+impl CharParsable for RnaNucleotide {
+    fn parse_char(&self, base: char) -> RnaNucleotide {
         match base {
             'A' => RnaNucleotide::A,
             'C' => RnaNucleotide::C,
             'G' => RnaNucleotide::G,
             'U' => RnaNucleotide::U,
-            _ => panic!("\"{}\" is not a recognized DNA base.", base),
+            _ => panic!("\"{}\" is not a recognized RNA base.", base),
         }
     }
 }
 
-pub fn read_base_string_file<T: StringParsable>(path: &str, kind: T) -> NucleicAcid {
+pub fn read_base_string_file<U: CharParsable>(path: &str, kind: U) -> Vec<U> {
     let file = fs::read_to_string(path).expect("Can't parse file to into a string.");
     let seq = file.to_uppercase().trim().to_string();
-    kind.parse(seq)
+    parse_string(&seq, kind)
+}
+
+pub fn parse_string<U: CharParsable>(seq: &String, kind: U) -> Vec<U> {
+    seq.chars().map(|c| kind.parse_char(c)).collect()
 }
 
 pub fn hamming_distance(seq1: &str, seq2: &str) -> i32 {
@@ -206,15 +209,17 @@ pub fn reverse_complement_dna(dna_seq: &String) -> String {
 
 #[cfg(test)]
 mod tests {
+    use crate::RnaNucleotide;
     use crate::hamming_distance;
     use crate::hamming_distance_functional;
+    use crate::parse_string;
     use crate::reverse_complement_dna;
     use crate::transcribe_dna_to_rna;
     use crate::translate_rna_to_amino_acids;
 
     #[test]
     fn test_translate_rna_to_amino_acids() {
-        let test_rna = "AUGGCCAUGGCGCCCAGAACUGAGAUCAAUAGUACCCGUAUUAACGGGUGA".to_string();
+        let test_rna = parse_string(&"AUGGCCAUGGCGCCCAGAACUGAGAUCAAUAGUACCCGUAUUAACGGGUGA".to_string(), RnaNucleotide::U);
         let answer = translate_rna_to_amino_acids(&test_rna);
         assert_eq!(answer, "MAMAPRTEINSTRINGS")
     }
