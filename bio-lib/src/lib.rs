@@ -321,6 +321,33 @@ pub fn reverse_complement<T: Nucleotide>(seq: &Vec<T>) -> Vec<T> {
     seq.iter().rev().map(|base| base.complement()).collect()
 }
 
+pub fn get_base_counts(seq: &String) -> [u32; 4] {
+    let mut base_counts = [0; 4];
+    for base in seq.chars() {
+        match base {
+            'A' => base_counts[0] += 1,
+            'C' => base_counts[1] += 1,
+            'G' => base_counts[2] += 1,
+            'T' => base_counts[3] += 1,
+            _ => panic!("Input contains '{}' which is not A, T, C, or G", base),
+        }
+    }
+    base_counts
+}
+
+pub fn get_base_counts_functional(seq: &String) -> [u32; 4] {
+    seq.chars().fold([0; 4], |mut base_counts, base| {
+        match base {
+            'A' => base_counts[0] += 1,
+            'C' => base_counts[1] += 1,
+            'G' => base_counts[2] += 1,
+            'T' => base_counts[3] += 1,
+            _ => panic!("Input contains '{}' which is not A, T, C, or G", base),
+        }
+        base_counts
+    })
+}
+
 #[cfg(test)]
 mod tests {
     use crate::hamming_distance;
