@@ -1,18 +1,18 @@
 use bio_lib::{
-    read_string_file, reverse_complement, transcribe_dna_to_rna,
-    translate,
+    read_and_parse_string_file, reverse_complement, transcribe, translate, StringParsable, DNA, RNA,
 };
 
 fn main() {
-    println!("p2");
-    let input = read_string_file("p2/rosalind_rna.txt");
-    let answer = transcribe_dna_to_rna(&input);
-    println!("{}", answer);
-    println!("\np3");
-    let input = read_string_file("p2/rosalind_revc.txt");
+    println!("RNA");
+    let input = read_and_parse_string_file::<DNA>("p2/rosalind_rna.txt");
+    let answer = transcribe(&input);
+    println!("{}", answer.to_string());
+    println!("REVC");
+    let input = read_and_parse_string_file::<DNA>("p2/rosalind_revc.txt");
     let answer = reverse_complement(&input);
-    println!("{}", answer);
-    let input = read_string_file("p2/rosalind_prot.txt");
+    println!("{}", answer.to_string());
+    println!("PROT");
+    let input = read_and_parse_string_file::<RNA>("p2/rosalind_prot.txt");
     let answer = translate(&input);
-    println!("{}", answer);
+    println!("{}", answer.to_string());
 }

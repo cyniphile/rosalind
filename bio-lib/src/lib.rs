@@ -1,5 +1,6 @@
 use std::fs;
 
+#[derive(PartialEq)]
 pub enum DnaNucleotide {
     A,
     C,
@@ -7,6 +8,7 @@ pub enum DnaNucleotide {
     T,
 }
 
+#[derive(PartialEq)]
 pub enum RnaNucleotide {
     A,
     C,
@@ -14,6 +16,7 @@ pub enum RnaNucleotide {
     U,
 }
 
+#[derive(PartialEq)]
 pub enum AminoAcid {
     A,
     R,
@@ -38,9 +41,9 @@ pub enum AminoAcid {
     Stop,
 }
 
-type DNA = Vec<DnaNucleotide>;
-type RNA = Vec<RnaNucleotide>;
-type Protein = Vec<AminoAcid>;
+pub type DNA = Vec<DnaNucleotide>;
+pub type RNA = Vec<RnaNucleotide>;
+pub type Protein = Vec<AminoAcid>;
 
 pub trait Nucleotide {
     fn complement(&self) -> Self;
@@ -183,10 +186,15 @@ impl StringParsable for Protein {
     }
 }
 
-pub fn read_string_file<T: StringParsable>(path: &str) -> T {
+pub fn read_and_parse_string_file<T: StringParsable>(path: &str) -> T {
     let file = fs::read_to_string(path).expect("Can't parse file to into a string.");
     let seq = file.to_uppercase().trim().to_string();
     T::parse_string(&seq)
+}
+
+pub fn read_string_file(path: &str) -> String {
+    let file = fs::read_to_string(path).expect("fuck");
+    file.to_uppercase().trim().to_string()
 }
 
 //   TODO: using a tuple struct added some complexity to the ownership stucture.
@@ -194,15 +202,15 @@ pub fn read_string_file<T: StringParsable>(path: &str) -> T {
 // struct Codon(RnaNucleotide, RnaNucleotide, RnaNucleotide);
 
 //   TODO: do some profiling to compare with 'functional' implementation
-// https://crates.io/crates/criterion
-pub fn hamming_distance(seq1: &str, seq2: &str) -> i32 {
+//   https://crates.io/crates/criterion
+pub fn hamming_distance<U: PartialEq>(seq1: &Vec<U>, seq2: &Vec<U>) -> i32 {
     assert_eq!(
         seq1.len(),
         seq2.len(),
         "This implementation of Hamming distance only works for strings of equal size."
     );
     let mut dist = 0;
-    for (x, y) in seq1.chars().zip(seq2.chars()) {
+    for (x, y) in seq1.iter().zip(seq2) {
         if x != y {
             dist += 1;
         }
@@ -210,15 +218,15 @@ pub fn hamming_distance(seq1: &str, seq2: &str) -> i32 {
     dist
 }
 
-pub fn hamming_distance_functional(seq1: &String, seq2: &String) -> i32 {
+pub fn hamming_distance_functional<U: PartialEq>(seq1: &Vec<U>, seq2: &Vec<U>) -> i32 {
     assert_eq!(
         seq1.len(),
         seq2.len(),
         "This implementation of Hamming distance only works 
         for strings of equal size."
     );
-    seq1.chars()
-        .zip(seq2.chars())
+    seq1.iter()
+        .zip(seq2)
         .fold(0, |acc, (x, y)| if x != y { acc + 1 } else { acc })
 }
 
@@ -299,7 +307,7 @@ pub fn translate(rna: &RNA) -> Protein {
         .collect()
 }
 
-pub fn transcribe(seq: DNA) -> RNA {
+pub fn transcribe(seq: &DNA) -> RNA {
     let transcribe = |base: &DnaNucleotide| match base {
         DnaNucleotide::A => RnaNucleotide::A,
         DnaNucleotide::C => RnaNucleotide::C,
@@ -335,7 +343,7 @@ mod tests {
     #[test]
     fn test_trascribe() {
         let seq = DNA::parse_string(&"GATGGAACTTGACTACGTAAATT".to_string());
-        let answer = transcribe(seq).to_string();
+        let answer = transcribe(&seq).to_string();
         assert_eq!(answer, "GAUGGAACUUGACUACGUAAAUU");
     }
 
@@ -344,12 +352,15 @@ mod tests {
         let seq = DNA::parse_string(&"AAAACCCGGT".to_string());
         let answer = reverse_complement(&seq).to_string();
         assert_eq!(answer, "ACCGGGTTTT");
+        let seq = RNA::parse_string(&"AAAACCCGGU".to_string());
+        let answer = reverse_complement(&seq).to_string();
+        assert_eq!(answer, "ACCGGGUUUU");
     }
 
     #[test]
     fn test_hamming_distance() {
-        let seq1 = "GAGCCTACTAACGGGAT".to_string();
-        let seq2 = "CATCGTAATGACGGCCT".to_string();
+        let seq1 = DNA::parse_string(&"GAGCCTACTAACGGGAT".to_string());
+        let seq2 = DNA::parse_string(&"CATCGTAATGACGGCCT".to_string());
         let answer = hamming_distance(&seq1, &seq2);
         assert_eq!(answer, 7);
         let answer = hamming_distance_functional(&seq1, &seq2);
