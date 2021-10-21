@@ -38,13 +38,17 @@ pub enum AminoAcid {
     Stop,
 }
 
-trait Nucleotide {
-    fn get_base_complement(&self) -> Self;
+type DNA = Vec<DnaNucleotide>;
+type RNA = Vec<RnaNucleotide>;
+type Protein = Vec<AminoAcid>;
+
+pub trait Nucleotide {
+    fn complement(&self) -> Self;
 }
 
 // TODO: is there exhaustivity checking for Bijective maps?
 impl Nucleotide for DnaNucleotide {
-    fn get_base_complement(&self) -> DnaNucleotide {
+    fn complement(&self) -> DnaNucleotide {
         match self {
             DnaNucleotide::A => DnaNucleotide::T,
             DnaNucleotide::T => DnaNucleotide::A,
@@ -55,7 +59,7 @@ impl Nucleotide for DnaNucleotide {
 }
 
 impl Nucleotide for RnaNucleotide {
-    fn get_base_complement(&self) -> RnaNucleotide {
+    fn complement(&self) -> RnaNucleotide {
         match self {
             RnaNucleotide::A => RnaNucleotide::U,
             RnaNucleotide::U => RnaNucleotide::A,
@@ -64,10 +68,6 @@ impl Nucleotide for RnaNucleotide {
         }
     }
 }
-
-type DNA = Vec<DnaNucleotide>;
-type RNA = Vec<RnaNucleotide>;
-type Protein = Vec<AminoAcid>;
 
 pub trait StringParsable {
     fn parse_string(seq: &String) -> Self;
@@ -189,11 +189,11 @@ pub fn read_string_file<T: StringParsable>(path: &str) -> T {
     T::parse_string(&seq)
 }
 
-// TODO: using a tuple struct added some complexity to the ownership stucture.
-// For now just using 3-ples
+//   TODO: using a tuple struct added some complexity to the ownership stucture.
+//   For now just using 3-ples
 // struct Codon(RnaNucleotide, RnaNucleotide, RnaNucleotide);
 
-// TODO: do some profiling to compare with 'functional' implementation
+//   TODO: do some profiling to compare with 'functional' implementation
 // https://crates.io/crates/criterion
 pub fn hamming_distance(seq1: &str, seq2: &str) -> i32 {
     assert_eq!(
@@ -309,18 +309,15 @@ pub fn transcribe(seq: DNA) -> RNA {
     seq.iter().map(transcribe).collect()
 }
 
-// pub fn reverse_complement_dna(dna_seq: &String) -> String {
-//     dna_seq
-//         .chars()
-//         .rev()
-//         .map(|base| get_dna_base_complement(base))
-//         .collect()
-// }
+pub fn reverse_complement<T: Nucleotide>(seq: &Vec<T>) -> Vec<T> {
+    seq.iter().rev().map(|base| base.complement()).collect()
+}
 
 #[cfg(test)]
 mod tests {
     use crate::hamming_distance;
     use crate::hamming_distance_functional;
+    use crate::reverse_complement;
     use crate::transcribe;
     use crate::translate;
     use crate::StringParsable;
@@ -336,18 +333,18 @@ mod tests {
     }
 
     #[test]
-    fn test_trascribe_dna_to_rna() {
+    fn test_trascribe() {
         let seq = DNA::parse_string(&"GATGGAACTTGACTACGTAAATT".to_string());
         let answer = transcribe(seq).to_string();
         assert_eq!(answer, "GAUGGAACUUGACUACGUAAAUU");
     }
 
-    // #[test]
-    // fn test_reverse_complement() {
-    //     let seq = "AAAACCCGGT".to_string();
-    //     let answer = reverse_complement_dna(&seq);
-    //     assert_eq!(answer, "ACCGGGTTTT");
-    // }
+    #[test]
+    fn test_reverse_complement() {
+        let seq = DNA::parse_string(&"AAAACCCGGT".to_string());
+        let answer = reverse_complement(&seq).to_string();
+        assert_eq!(answer, "ACCGGGTTTT");
+    }
 
     #[test]
     fn test_hamming_distance() {
