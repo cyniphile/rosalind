@@ -1,4 +1,4 @@
-use bio_lib::read_base_string_file;
+use bio_lib::read_string_file;
 use core::panic;
 
 fn get_base_counts(seq: &String) -> [u32; 4] {
@@ -29,7 +29,7 @@ fn get_base_counts_functional(seq: &String) -> [u32; 4] {
 }
 
 fn main() {
-    let file = read_base_string_file("p1/rosalind_dna.txt");
+    let file = read_string_file("p1/rosalind_dna.txt");
     let answer = get_base_counts(&file);
     let answer_functional = get_base_counts_functional(&file);
     fn print_answer(answer: [u32; 4]) {

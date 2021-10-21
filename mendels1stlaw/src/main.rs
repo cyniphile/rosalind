@@ -1,4 +1,4 @@
-use bio_lib::read_base_string_file;
+use bio_lib::read_string_file;
 
 fn get_prob_dominant_phenotype(n_homo_dom: i32, n_hetero: i32, n_homo_recess: i32) -> f32 {
     let n_homo_dom = n_homo_dom as f32;
@@ -22,7 +22,7 @@ fn get_prob_dominant_phenotype(n_homo_dom: i32, n_hetero: i32, n_homo_recess: i3
     ) / all_choices
 }
 fn main() {
-    let input = read_base_string_file("mendels1stlaw/rosalind_iprb.txt");
+    let input = read_string_file("mendels1stlaw/rosalind_iprb.txt");
     let split: Vec<i32> = input
         .split_whitespace()
         .map(|s| s.parse::<i32>().unwrap())

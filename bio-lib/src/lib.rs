@@ -1,16 +1,40 @@
 use std::fs;
 
-enum DnaNucleotide {
+pub enum DnaNucleotide {
     A,
     C,
     G,
     T,
 }
-enum RnaNucleotide {
+pub enum RnaNucleotide {
     A,
     C,
     G,
     U,
+}
+
+pub enum AminoAcid {
+    A,
+    R,
+    N,
+    D,
+    C,
+    Q,
+    E,
+    G,
+    H,
+    I,
+    L,
+    K,
+    M,
+    F,
+    P,
+    S,
+    T,
+    W,
+    Y,
+    V,
+    Stop,
 }
 
 trait Nucleotide {
@@ -40,53 +64,133 @@ impl Nucleotide for RnaNucleotide {
     }
 }
 
-// TODO: Not sure how to use these derived types yet without impl FromIterator
-// type DNA = Vec<DnaNucleotide>;
-// type RNA = Vec<RnaNucleotide>;
+type DNA = Vec<DnaNucleotide>;
+type RNA = Vec<RnaNucleotide>;
+type Protein = Vec<AminoAcid>;
 
-// trait NucleicAcid {}
-
-// impl NucleicAcid for DNA {}
-// impl NucleicAcid for DNA {}
-
-trait CharParsable {
-    fn parse_char(&self, base: char) -> Self;
+pub trait StringParsable {
+    fn parse_string(seq: &String) -> Self;
+    fn to_string(&self) -> String;
 }
 
-// TODO: make these bijective maps
-impl CharParsable for DnaNucleotide {
-    fn parse_char(&self, base: char) -> DnaNucleotide {
-        match base {
+impl StringParsable for DNA {
+    fn parse_string(seq: &String) -> DNA {
+        let parser = |base| match base {
+            // TODO: make these bijective maps
             'A' => DnaNucleotide::A,
             'C' => DnaNucleotide::C,
             'G' => DnaNucleotide::G,
             'T' => DnaNucleotide::T,
             _ => panic!("\"{}\" is not a recognized DNA base.", base),
+        };
+        seq.chars().map(parser).collect()
+    }
+    fn to_string(&self) -> String {
+        fn parser(base: &DnaNucleotide) -> char {
+            match base {
+                DnaNucleotide::A => 'A',
+                DnaNucleotide::C => 'C',
+                DnaNucleotide::G => 'G',
+                DnaNucleotide::T => 'T',
+            }
         }
+        self.iter().map(parser).collect()
     }
 }
 
-impl CharParsable for RnaNucleotide {
-    fn parse_char(&self, base: char) -> RnaNucleotide {
-        match base {
+impl StringParsable for RNA {
+    fn parse_string(seq: &String) -> RNA {
+        let parser = |base| match base {
+            // TODO: make these bijective maps
             'A' => RnaNucleotide::A,
             'C' => RnaNucleotide::C,
             'G' => RnaNucleotide::G,
             'U' => RnaNucleotide::U,
             _ => panic!("\"{}\" is not a recognized RNA base.", base),
+        };
+        seq.chars().map(parser).collect()
+    }
+    fn to_string(&self) -> String {
+        fn parser(base: &RnaNucleotide) -> char {
+            match base {
+                RnaNucleotide::A => 'A',
+                RnaNucleotide::C => 'C',
+                RnaNucleotide::G => 'G',
+                RnaNucleotide::U => 'U',
+            }
         }
+        self.iter().map(parser).collect()
     }
 }
 
-pub fn read_base_string_file<U: CharParsable>(path: &str, kind: U) -> Vec<U> {
-    let file = fs::read_to_string(path).expect("Can't parse file to into a string.");
-    let seq = file.to_uppercase().trim().to_string();
-    parse_string(&seq, kind)
+impl StringParsable for Protein {
+    fn parse_string(seq: &String) -> Self {
+        let parser = |aa| match aa {
+            // TODO: make these bijective maps
+            'A' => AminoAcid::A,
+            'R' => AminoAcid::R,
+            'N' => AminoAcid::N,
+            'D' => AminoAcid::D,
+            'C' => AminoAcid::C,
+            'Q' => AminoAcid::Q,
+            'E' => AminoAcid::E,
+            'G' => AminoAcid::G,
+            'H' => AminoAcid::H,
+            'I' => AminoAcid::I,
+            'L' => AminoAcid::L,
+            'K' => AminoAcid::K,
+            'M' => AminoAcid::M,
+            'F' => AminoAcid::F,
+            'P' => AminoAcid::P,
+            'S' => AminoAcid::S,
+            'T' => AminoAcid::T,
+            'W' => AminoAcid::W,
+            'Y' => AminoAcid::Y,
+            'V' => AminoAcid::V,
+            '|' => AminoAcid::Stop,
+            _ => panic!("\"{}\" is not a recognized Amino Acid.", aa),
+        };
+        seq.chars().map(parser).collect()
+    }
+    fn to_string(&self) -> String {
+        fn parser(aa: &AminoAcid) -> char {
+            match aa {
+                AminoAcid::Stop => '|',
+                AminoAcid::V => 'V',
+                AminoAcid::Y => 'Y',
+                AminoAcid::W => 'W',
+                AminoAcid::T => 'T',
+                AminoAcid::S => 'S',
+                AminoAcid::P => 'P',
+                AminoAcid::F => 'F',
+                AminoAcid::M => 'M',
+                AminoAcid::K => 'K',
+                AminoAcid::L => 'L',
+                AminoAcid::I => 'I',
+                AminoAcid::H => 'H',
+                AminoAcid::G => 'G',
+                AminoAcid::E => 'E',
+                AminoAcid::Q => 'Q',
+                AminoAcid::C => 'C',
+                AminoAcid::D => 'D',
+                AminoAcid::N => 'N',
+                AminoAcid::R => 'R',
+                AminoAcid::A => 'A',
+            }
+        }
+        self.iter().map(parser).collect()
+    }
 }
 
-pub fn parse_string<U: CharParsable>(seq: &String, kind: U) -> Vec<U> {
-    seq.chars().map(|c| kind.parse_char(c)).collect()
+pub fn read_string_file<T: StringParsable>(path: &str) -> T {
+    let file = fs::read_to_string(path).expect("Can't parse file to into a string.");
+    let seq = file.to_uppercase().trim().to_string();
+    T::parse_string(&seq)
 }
+
+// TODO: using a tuple struct added some complexity to the ownership stucture.
+// For now just using 3-ples
+// struct Codon(RnaNucleotide, RnaNucleotide, RnaNucleotide);
 
 pub fn hamming_distance(seq1: &str, seq2: &str) -> i32 {
     assert_eq!(
@@ -115,128 +219,131 @@ pub fn hamming_distance_functional(seq1: &String, seq2: &String) -> i32 {
         .fold(0, |acc, (x, y)| if x != y { acc + 1 } else { acc })
 }
 
-fn translate_codon_to_amino_acid(codon: &[u8]) -> char {
+fn translate_codon(codon: (&RnaNucleotide, &RnaNucleotide, &RnaNucleotide)) -> AminoAcid {
     match codon {
-        b"UUU" => 'F',
-        b"CUU" => 'L',
-        b"AUU" => 'I',
-        b"GUU" => 'V',
-        b"UUC" => 'F',
-        b"CUC" => 'L',
-        b"AUC" => 'I',
-        b"GUC" => 'V',
-        b"UUA" => 'L',
-        b"CUA" => 'L',
-        b"AUA" => 'I',
-        b"GUA" => 'V',
-        b"UUG" => 'L',
-        b"CUG" => 'L',
-        b"AUG" => 'M',
-        b"GUG" => 'V',
-        b"UCU" => 'S',
-        b"CCU" => 'P',
-        b"ACU" => 'T',
-        b"GCU" => 'A',
-        b"UCC" => 'S',
-        b"CCC" => 'P',
-        b"ACC" => 'T',
-        b"GCC" => 'A',
-        b"UCA" => 'S',
-        b"CCA" => 'P',
-        b"ACA" => 'T',
-        b"GCA" => 'A',
-        b"UCG" => 'S',
-        b"CCG" => 'P',
-        b"ACG" => 'T',
-        b"GCG" => 'A',
-        b"UAU" => 'Y',
-        b"CAU" => 'H',
-        b"AAU" => 'N',
-        b"GAU" => 'D',
-        b"UAC" => 'Y',
-        b"CAC" => 'H',
-        b"AAC" => 'N',
-        b"GAC" => 'D',
-        b"UAA" => 'S',
-        b"CAA" => 'Q',
-        b"AAA" => 'K',
-        b"GAA" => 'E',
-        b"UAG" => 'S',
-        b"CAG" => 'Q',
-        b"AAG" => 'K',
-        b"GAG" => 'E',
-        b"UGU" => 'C',
-        b"CGU" => 'R',
-        b"AGU" => 'S',
-        b"GGU" => 'G',
-        b"UGC" => 'C',
-        b"CGC" => 'R',
-        b"AGC" => 'S',
-        b"GGC" => 'G',
-        b"UGA" => 'S',
-        b"CGA" => 'R',
-        b"AGA" => 'R',
-        b"GGA" => 'G',
-        b"UGG" => 'W',
-        b"CGG" => 'R',
-        b"AGG" => 'R',
-        b"GGG" => 'G',
-        _ => panic!("Codon {:?} not in the Genetic Code detected.", codon),
+        (RnaNucleotide::U, RnaNucleotide::U, RnaNucleotide::U) => AminoAcid::F,
+        (RnaNucleotide::U, RnaNucleotide::U, RnaNucleotide::C) => AminoAcid::F,
+        (RnaNucleotide::U, RnaNucleotide::U, RnaNucleotide::A) => AminoAcid::L,
+        (RnaNucleotide::U, RnaNucleotide::U, RnaNucleotide::G) => AminoAcid::L,
+        (RnaNucleotide::U, RnaNucleotide::C, RnaNucleotide::A) => AminoAcid::S,
+        (RnaNucleotide::U, RnaNucleotide::C, RnaNucleotide::C) => AminoAcid::S,
+        (RnaNucleotide::U, RnaNucleotide::C, RnaNucleotide::G) => AminoAcid::S,
+        (RnaNucleotide::U, RnaNucleotide::C, RnaNucleotide::U) => AminoAcid::S,
+        (RnaNucleotide::U, RnaNucleotide::A, RnaNucleotide::U) => AminoAcid::Y,
+        (RnaNucleotide::U, RnaNucleotide::A, RnaNucleotide::C) => AminoAcid::Y,
+        (RnaNucleotide::U, RnaNucleotide::A, RnaNucleotide::A) => AminoAcid::Stop,
+        (RnaNucleotide::U, RnaNucleotide::A, RnaNucleotide::G) => AminoAcid::Stop,
+        (RnaNucleotide::U, RnaNucleotide::G, RnaNucleotide::U) => AminoAcid::C,
+        (RnaNucleotide::U, RnaNucleotide::G, RnaNucleotide::C) => AminoAcid::C,
+        (RnaNucleotide::U, RnaNucleotide::G, RnaNucleotide::A) => AminoAcid::Stop,
+        (RnaNucleotide::U, RnaNucleotide::G, RnaNucleotide::G) => AminoAcid::W,
+        (RnaNucleotide::C, RnaNucleotide::U, RnaNucleotide::U) => AminoAcid::L,
+        (RnaNucleotide::A, RnaNucleotide::U, RnaNucleotide::U) => AminoAcid::I,
+        (RnaNucleotide::G, RnaNucleotide::U, RnaNucleotide::U) => AminoAcid::V,
+        (RnaNucleotide::C, RnaNucleotide::U, RnaNucleotide::C) => AminoAcid::L,
+        (RnaNucleotide::A, RnaNucleotide::U, RnaNucleotide::C) => AminoAcid::I,
+        (RnaNucleotide::G, RnaNucleotide::U, RnaNucleotide::C) => AminoAcid::V,
+        (RnaNucleotide::C, RnaNucleotide::U, RnaNucleotide::A) => AminoAcid::L,
+        (RnaNucleotide::A, RnaNucleotide::U, RnaNucleotide::A) => AminoAcid::I,
+        (RnaNucleotide::G, RnaNucleotide::U, RnaNucleotide::A) => AminoAcid::V,
+        (RnaNucleotide::C, RnaNucleotide::U, RnaNucleotide::G) => AminoAcid::L,
+        (RnaNucleotide::A, RnaNucleotide::U, RnaNucleotide::G) => AminoAcid::M,
+        (RnaNucleotide::G, RnaNucleotide::U, RnaNucleotide::G) => AminoAcid::V,
+        (RnaNucleotide::C, RnaNucleotide::C, RnaNucleotide::U) => AminoAcid::P,
+        (RnaNucleotide::A, RnaNucleotide::C, RnaNucleotide::U) => AminoAcid::T,
+        (RnaNucleotide::G, RnaNucleotide::C, RnaNucleotide::U) => AminoAcid::A,
+        (RnaNucleotide::C, RnaNucleotide::C, RnaNucleotide::C) => AminoAcid::P,
+        (RnaNucleotide::A, RnaNucleotide::C, RnaNucleotide::C) => AminoAcid::T,
+        (RnaNucleotide::G, RnaNucleotide::C, RnaNucleotide::C) => AminoAcid::A,
+        (RnaNucleotide::C, RnaNucleotide::C, RnaNucleotide::A) => AminoAcid::P,
+        (RnaNucleotide::A, RnaNucleotide::C, RnaNucleotide::A) => AminoAcid::T,
+        (RnaNucleotide::G, RnaNucleotide::C, RnaNucleotide::A) => AminoAcid::A,
+        (RnaNucleotide::C, RnaNucleotide::C, RnaNucleotide::G) => AminoAcid::P,
+        (RnaNucleotide::A, RnaNucleotide::C, RnaNucleotide::G) => AminoAcid::T,
+        (RnaNucleotide::G, RnaNucleotide::C, RnaNucleotide::G) => AminoAcid::A,
+        (RnaNucleotide::C, RnaNucleotide::A, RnaNucleotide::U) => AminoAcid::H,
+        (RnaNucleotide::A, RnaNucleotide::A, RnaNucleotide::U) => AminoAcid::N,
+        (RnaNucleotide::G, RnaNucleotide::A, RnaNucleotide::U) => AminoAcid::D,
+        (RnaNucleotide::C, RnaNucleotide::A, RnaNucleotide::C) => AminoAcid::H,
+        (RnaNucleotide::A, RnaNucleotide::A, RnaNucleotide::C) => AminoAcid::N,
+        (RnaNucleotide::G, RnaNucleotide::A, RnaNucleotide::C) => AminoAcid::D,
+        (RnaNucleotide::C, RnaNucleotide::A, RnaNucleotide::A) => AminoAcid::Q,
+        (RnaNucleotide::A, RnaNucleotide::A, RnaNucleotide::A) => AminoAcid::K,
+        (RnaNucleotide::G, RnaNucleotide::A, RnaNucleotide::A) => AminoAcid::E,
+        (RnaNucleotide::C, RnaNucleotide::A, RnaNucleotide::G) => AminoAcid::Q,
+        (RnaNucleotide::A, RnaNucleotide::A, RnaNucleotide::G) => AminoAcid::K,
+        (RnaNucleotide::G, RnaNucleotide::A, RnaNucleotide::G) => AminoAcid::E,
+        (RnaNucleotide::C, RnaNucleotide::G, RnaNucleotide::U) => AminoAcid::R,
+        (RnaNucleotide::A, RnaNucleotide::G, RnaNucleotide::U) => AminoAcid::S,
+        (RnaNucleotide::G, RnaNucleotide::G, RnaNucleotide::U) => AminoAcid::G,
+        (RnaNucleotide::C, RnaNucleotide::G, RnaNucleotide::C) => AminoAcid::R,
+        (RnaNucleotide::A, RnaNucleotide::G, RnaNucleotide::C) => AminoAcid::S,
+        (RnaNucleotide::G, RnaNucleotide::G, RnaNucleotide::C) => AminoAcid::G,
+        (RnaNucleotide::C, RnaNucleotide::G, RnaNucleotide::A) => AminoAcid::R,
+        (RnaNucleotide::A, RnaNucleotide::G, RnaNucleotide::A) => AminoAcid::R,
+        (RnaNucleotide::G, RnaNucleotide::G, RnaNucleotide::A) => AminoAcid::G,
+        (RnaNucleotide::C, RnaNucleotide::G, RnaNucleotide::G) => AminoAcid::R,
+        (RnaNucleotide::A, RnaNucleotide::G, RnaNucleotide::G) => AminoAcid::R,
+        (RnaNucleotide::G, RnaNucleotide::G, RnaNucleotide::G) => AminoAcid::G,
     }
 }
 
-pub fn translate_rna_to_amino_acids(rna: &String) -> String {
-    rna.as_bytes()
-        .chunks(3)
-        .map(|codon| translate_codon_to_amino_acid(codon))
+pub fn translate(rna: &RNA) -> Protein {
+    rna.chunks(3)
+        .map(|chunk| (&chunk[0], &chunk[1], &chunk[2]))
+        .map(translate_codon)
         .collect()
 }
 
-pub fn transcribe_dna_to_rna(dna_seq: &String) -> String {
-    dna_seq
-        .chars()
-        .map(|x| if x == 'T' { 'U' } else { x })
-        .collect()
+pub fn transcribe(seq: DNA) -> RNA {
+    let transcribe = |base: &DnaNucleotide| match base {
+        DnaNucleotide::A => RnaNucleotide::A,
+        DnaNucleotide::C => RnaNucleotide::C,
+        DnaNucleotide::G => RnaNucleotide::G,
+        DnaNucleotide::T => RnaNucleotide::U,
+    };
+    seq.iter().map(transcribe).collect()
 }
 
-pub fn reverse_complement_dna(dna_seq: &String) -> String {
-    dna_seq
-        .chars()
-        .rev()
-        .map(|base| get_dna_base_complement(base))
-        .collect()
-}
+// pub fn reverse_complement_dna(dna_seq: &String) -> String {
+//     dna_seq
+//         .chars()
+//         .rev()
+//         .map(|base| get_dna_base_complement(base))
+//         .collect()
+// }
 
 #[cfg(test)]
 mod tests {
-    use crate::RnaNucleotide;
     use crate::hamming_distance;
     use crate::hamming_distance_functional;
-    use crate::parse_string;
-    use crate::reverse_complement_dna;
-    use crate::transcribe_dna_to_rna;
-    use crate::translate_rna_to_amino_acids;
+    use crate::transcribe;
+    use crate::translate;
+    use crate::StringParsable;
+    use crate::DNA;
+    use crate::RNA;
 
     #[test]
-    fn test_translate_rna_to_amino_acids() {
-        let test_rna = parse_string(&"AUGGCCAUGGCGCCCAGAACUGAGAUCAAUAGUACCCGUAUUAACGGGUGA".to_string(), RnaNucleotide::U);
-        let answer = translate_rna_to_amino_acids(&test_rna);
-        assert_eq!(answer, "MAMAPRTEINSTRINGS")
+    fn test_translate() {
+        let test_rna =
+            RNA::parse_string(&"AUGGCCAUGGCGCCCAGAACUGAGAUCAAUAGUACCCGUAUUAACGGGUGA".to_string());
+        let answer = translate(&test_rna).to_string();
+        assert_eq!(answer, "MAMAPRTEINSTRING|")
     }
 
     #[test]
     fn test_trascribe_dna_to_rna() {
-        let seq = "GATGGAACTTGACTACGTAAATT".to_string();
-        let answer = transcribe_dna_to_rna(&seq);
+        let seq = DNA::parse_string(&"GATGGAACTTGACTACGTAAATT".to_string());
+        let answer = transcribe(seq).to_string();
         assert_eq!(answer, "GAUGGAACUUGACUACGUAAAUU");
     }
 
-    #[test]
-    fn test_reverse_complement() {
-        let seq = "AAAACCCGGT".to_string();
-        let answer = reverse_complement_dna(&seq);
-        assert_eq!(answer, "ACCGGGTTTT");
-    }
+    // #[test]
+    // fn test_reverse_complement() {
+    //     let seq = "AAAACCCGGT".to_string();
+    //     let answer = reverse_complement_dna(&seq);
+    //     assert_eq!(answer, "ACCGGGTTTT");
+    // }
 
     #[test]
     fn test_hamming_distance() {
