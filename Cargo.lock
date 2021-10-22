@@ -16,20 +16,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "mendels1stlaw"
-version = "0.1.0"
-dependencies = [
- "bio-lib",
-]
-
-[[package]]
-name = "p1"
-version = "0.1.0"
-dependencies = [
- "bio-lib",
-]
-
-[[package]]
 name = "p2"
 version = "0.1.0"
 dependencies = [

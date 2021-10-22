@@ -1,6 +1,6 @@
-use std::fs;
+use std::{collections::HashMap, fs};
 
-#[derive(PartialEq)]
+#[derive(PartialEq, Eq, Hash)]
 pub enum DnaNucleotide {
     A,
     C,
@@ -8,7 +8,8 @@ pub enum DnaNucleotide {
     T,
 }
 
-#[derive(PartialEq)]
+// TODO: possibly use https://docs.rs/strum/0.13.0/strum/ to make all the to string mapping easier
+#[derive(PartialEq, Eq, Hash)]
 pub enum RnaNucleotide {
     A,
     C,
@@ -16,7 +17,7 @@ pub enum RnaNucleotide {
     U,
 }
 
-#[derive(PartialEq)]
+#[derive(PartialEq, Eq, Hash)]
 pub enum AminoAcid {
     A,
     R,
@@ -197,8 +198,8 @@ pub fn read_string_file(path: &str) -> String {
     file.to_uppercase().trim().to_string()
 }
 
-//   TODO: using a tuple struct added some complexity to the ownership stucture.
-//   For now just using 3-ples
+//   TODO: using a named tuple struct added some complexity to the ownership stucture.
+//   For now just using simple 3-ples
 // struct Codon(RnaNucleotide, RnaNucleotide, RnaNucleotide);
 
 //   TODO: do some profiling to compare with 'functional' implementation
@@ -321,40 +322,24 @@ pub fn reverse_complement<T: Nucleotide>(seq: &Vec<T>) -> Vec<T> {
     seq.iter().rev().map(|base| base.complement()).collect()
 }
 
-pub fn get_base_counts(seq: &String) -> [u32; 4] {
-    let mut base_counts = [0; 4];
-    for base in seq.chars() {
-        match base {
-            'A' => base_counts[0] += 1,
-            'C' => base_counts[1] += 1,
-            'G' => base_counts[2] += 1,
-            'T' => base_counts[3] += 1,
-            _ => panic!("Input contains '{}' which is not A, T, C, or G", base),
-        }
+pub fn base_counts<T: Eq + std::hash::Hash>(seq: &Vec<T>) -> HashMap<&T, u32> {
+    let mut counts = HashMap::new();
+    for item in seq {
+        *counts.entry(item).or_insert(0) += 1 as u32;
     }
-    base_counts
-}
-
-pub fn get_base_counts_functional(seq: &String) -> [u32; 4] {
-    seq.chars().fold([0; 4], |mut base_counts, base| {
-        match base {
-            'A' => base_counts[0] += 1,
-            'C' => base_counts[1] += 1,
-            'G' => base_counts[2] += 1,
-            'T' => base_counts[3] += 1,
-            _ => panic!("Input contains '{}' which is not A, T, C, or G", base),
-        }
-        base_counts
-    })
+    counts
 }
 
 #[cfg(test)]
 mod tests {
+    // TODO: organize above code into a module to avoid the many imports here
+    use crate::base_counts;
     use crate::hamming_distance;
     use crate::hamming_distance_functional;
     use crate::reverse_complement;
     use crate::transcribe;
     use crate::translate;
+    use crate::DnaNucleotide;
     use crate::StringParsable;
     use crate::DNA;
     use crate::RNA;
@@ -392,5 +377,20 @@ mod tests {
         assert_eq!(answer, 7);
         let answer = hamming_distance_functional(&seq1, &seq2);
         assert_eq!(answer, 7);
+    }
+
+    #[test]
+    fn test_base_counts() {
+        let seq = DNA::parse_string(
+            &"AGCTTTTCATTCTGACTGCAACGGGCAATATGTCTCTGTGTGGATTAAAAAAAGAGTGTCTGATAGCAGC".to_string(),
+        );
+        let answer = base_counts(&seq);
+        let answer = [
+            answer.get(&DnaNucleotide::A).unwrap().to_owned(),
+            answer.get(&DnaNucleotide::C).unwrap().to_owned(),
+            answer.get(&DnaNucleotide::G).unwrap().to_owned(),
+            answer.get(&DnaNucleotide::T).unwrap().to_owned(),
+        ];
+        assert_eq!(answer, [20, 12, 17, 21]);
     }
 }
