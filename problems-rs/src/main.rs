@@ -1,6 +1,7 @@
 use bio_lib::{
-    base_counts, base_counts_functional, hamming_distance, read_and_parse_string_file,
-    read_string_file, reverse_complement, transcribe, translate, StringParsable, DNA, RNA,
+    base_counts, hamming_distance, read_and_parse_string_file,
+    read_string_file, reverse_complement, transcribe, translate, StringParsable, 
+    DnaIter, RnaIter, DnaNucleotide
 };
 
 fn get_prob_dominant_phenotype(n_homo_dom: i32, n_hetero: i32, n_homo_recess: i32) -> f32 {
@@ -27,41 +28,46 @@ fn get_prob_dominant_phenotype(n_homo_dom: i32, n_hetero: i32, n_homo_recess: i3
 
 
 fn main() {
-    println!();
+    // TODO: refactor this mess
+    println!("==================================");
     println!("DNA");
     println!();
-    let file = read_string_file("problems-rs/data/rosalind_dna.txt");
+    let file = read_and_parse_string_file::<DnaIter>("problems-rs/data/rosalind_dna.txt");
     let answer = base_counts(&file);
-    let answer_functional = base_counts_functional(&file);
+        let answer = [
+            answer.get(&DnaNucleotide::A).unwrap().to_owned(),
+            answer.get(&DnaNucleotide::C).unwrap().to_owned(),
+            answer.get(&DnaNucleotide::G).unwrap().to_owned(),
+            answer.get(&DnaNucleotide::T).unwrap().to_owned(),
+        ];
     fn print_answer(answer: [u32; 4]) {
         println!("{} {} {} {}", answer[0], answer[1], answer[2], answer[3]);
     }
     print_answer(answer);
-    print_answer(answer_functional);
     println!();
     println!("RNA");
     println!();
-    let input = read_and_parse_string_file::<DNA>("problems-rs/data/rosalind_rna.txt");
+    let input = read_and_parse_string_file::<DnaIter>("problems-rs/data/rosalind_rna.txt");
     let answer = transcribe(&input);
     println!("{}", answer.to_string());
     println!();
     println!("REVC");
     println!();
-    let input = read_and_parse_string_file::<DNA>("problems-rs/data/rosalind_revc.txt");
+    let input = read_and_parse_string_file::<DnaIter>("problems-rs/data/rosalind_revc.txt");
     let answer = reverse_complement(&input);
     println!("{}", answer.to_string());
     println!();
     println!("PROT");
     println!();
-    let input = read_and_parse_string_file::<RNA>("problems-rs/data/rosalind_prot.txt");
+    let input = read_and_parse_string_file::<RnaIter>("problems-rs/data/rosalind_prot.txt");
     let answer = translate(&input);
     println!("{}", answer.to_string());
     println!();
     println!("HAMM");
     println!();
-    let seqs: Vec<DNA> = read_string_file("problems-rs/data/rosalind_hamm.txt")
-        .split("\n")
-        .map(|s| DNA::parse_string(&s.to_string()))
+    let seqs: Vec<DnaIter> = read_string_file("problems-rs/data/rosalind_hamm.txt")
+        .lines() 
+        .map(|s| DnaIter::parse_string(&s.to_string()))
         .collect();
     let answer = hamming_distance(&seqs[0], &seqs[1]);
     println!("{}", answer.to_string());
