@@ -86,7 +86,7 @@ pub trait StringParsable {
     type Iter<'a>;
     // TODO: should be way to have default implementations of parse/to _string
     // So far causing type problems
-    fn parse_string<'a>(seq: &'a String) -> Self::Iter<'a>;
+    fn parse_string<'a>(seq: &'a str) -> Self::Iter<'a>;
     fn parse_char(c: &char) -> Self::Item;
     fn to_string(&self) -> String;
     fn to_char(c: &Self::Item) -> char;
@@ -105,7 +105,7 @@ impl StringParsable for Dna {
             _ => panic!("\"{}\" is not a recognized DNA base.", c),
         }
     }
-    fn parse_string<'a>(seq: &'a String) -> DnaIter {
+    fn parse_string<'a>(seq: &'a str) -> DnaIter {
         seq.chars().map(|c| Self::parse_char(&c))
     }
     fn to_char(c: &DnaNucleotide) -> char {
@@ -135,7 +135,7 @@ impl StringParsable for Rna {
             _ => panic!("\"{}\" is not a recognized RNA base.", c),
         }
     }
-    fn parse_string(seq: &String) -> RnaIter {
+    fn parse_string(seq: &str) -> RnaIter {
         seq.chars().map(|c| Self::parse_char(&c))
     }
     fn to_char(c: &Self::Item) -> char {
@@ -182,7 +182,7 @@ impl StringParsable for Protein {
             _ => panic!("\"{}\" is not a recognized Amino Acid symbol.", c),
         }
     }
-    fn parse_string(seq: &String) -> ProteinIter {
+    fn parse_string(seq: &str) -> ProteinIter {
         seq.chars().map(|c| Self::parse_char(&c))
     }
     fn to_char(aa: &Self::Item) -> char {
@@ -215,17 +215,6 @@ impl StringParsable for Protein {
     }
 }
 
-// TODO: how to read stream of characters from file
-// pub fn read_and_parse_string_file<T: StringParsable>(
-//     path: &str,
-// ) -> <T as StringParsable>::Iter<'_> {
-//     let f = {
-//         let file = fs::read_to_string(path).expect("Can't parse file to into a string.");
-//         file.to_uppercase().trim().to_string()
-//     };
-//     T::parse_string(&f)
-// }
-
 fn transcribe_base(base: &DnaNucleotide) -> RnaNucleotide {
     match base {
         DnaNucleotide::A => RnaNucleotide::A,
@@ -250,9 +239,9 @@ pub fn read_string_file(path: &str) -> String {
     file.to_uppercase().trim().to_string()
 }
 
-//   TODO: using a named tuple struct added some complexity to the ownership stucture.
-
-//   For now just using simple 3-ples
+/*TODO: using a named tuple struct added some complexity to the ownership stucture.
+  For now just using simple 3-ples
+*/
 // struct Codon(RnaNucleotide, RnaNucleotide, RnaNucleotide);
 
 //   TODO: Handle unequal length
@@ -334,7 +323,7 @@ pub fn translate_codon(codon: (&RnaNucleotide, &RnaNucleotide, &RnaNucleotide)) 
     }
 }
 
-struct Translator<I: Iterator<Item = RnaNucleotide>> {
+pub struct Translator<I: Iterator<Item = RnaNucleotide>> {
     inner: I,
 }
 
@@ -352,7 +341,7 @@ impl<I: Iterator<Item = RnaNucleotide>> Iterator for Translator<I> {
     }
 }
 
-trait TranscribeIteratorExt: Iterator<Item = RnaNucleotide> + Sized {
+pub trait TranscribeIteratorExt: Iterator<Item = RnaNucleotide> + Sized {
     fn translate(self) -> Translator<Self>;
 }
 
@@ -385,8 +374,8 @@ mod tests {
 
     #[test]
     fn test_trascribe() {
-        let string = "GATGGAACTTGACTACGTAAATT".to_string();
-        let seq = Dna::parse_string(&string);
+        let string = "GATGGAACTTGACTACGTAAATT";
+        let seq = Dna::parse_string(string);
         let answer: Rna = transcribe(seq).collect();
         let answer = answer.to_string();
         assert_eq!(answer, "GAUGGAACUUGACUACGUAAAUU");
@@ -399,7 +388,7 @@ mod tests {
     #[test]
     fn test_translate() {
         let string = "AUGGCCAUGGCGCCCAGAACUGAGAUCAAUAGUACCCGUAUUAACGGGUGA".to_string();
-        let test_rna = Rna::parse_string(&string);
+        let test_rna: RnaIter = Rna::parse_string(&string);
         let answer: Protein = test_rna.translate().collect();
         let answer = answer.to_string();
         assert_eq!(answer, "MAMAPRTEINSTRING|");
