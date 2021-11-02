@@ -255,16 +255,12 @@ pub fn read_string_file(path: &str) -> String {
 //   For now just using simple 3-ples
 // struct Codon(RnaNucleotide, RnaNucleotide, RnaNucleotide);
 
-//   TODO: make this accept iters
-pub fn hamming_distance<U: PartialEq>(seq1: &Vec<U>, seq2: &Vec<U>) -> i32 {
-    assert_eq!(
-        seq1.len(),
-        seq2.len(),
-        "This implementation of Hamming distance only works 
-        for strings of equal size."
-    );
-    seq1.iter()
-        .zip(seq2)
+//   TODO: Handle unequal length
+pub fn hamming_distance<I, U: PartialEq>(seq1: I, seq2: I) -> i32
+where
+    I: Iterator<Item = U>,
+{
+    seq1.zip(seq2)
         .fold(0, |acc, (x, y)| if x != y { acc + 1 } else { acc })
 }
 
@@ -431,13 +427,15 @@ mod tests {
         assert_eq!(answer, "ACCGGGUUUU");
     }
 
-    // #[test]
-    // fn test_hamming_distance() {
-    //     let seq1 = Dna::parse_string(&"GAGCCTACTAACGGGAT".to_string());
-    //     let seq2 = Dna::parse_string(&"CATCGTAATGACGGCCT".to_string());
-    //     let answer = hamming_distance(&seq1, &seq2);
-    //     assert_eq!(answer, 7);
-    // }
+    #[test]
+    fn test_hamming_distance() {
+        let string1 = "GAGCCTACTAACGGGAT".to_string();
+        let string2 = "CATCGTAATGACGGCCT".to_string();
+        let seq1 = Dna::parse_string(&string1);
+        let seq2 = Dna::parse_string(&string2);
+        let answer = hamming_distance(seq1, seq2);
+        assert_eq!(answer, 7);
+    }
 
     #[test]
     fn test_base_counts() {
