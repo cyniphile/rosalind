@@ -1,8 +1,8 @@
 #![feature(type_alias_impl_trait)]
 #![feature(generic_associated_types)]
+#![feature(associated_type_defaults)]
 
-use itertools::Itertools;
-use std::{collections::HashMap, fs, str::CharIndices};
+use std::{collections::HashMap, fs};
 
 #[derive(PartialEq, Eq, Hash)]
 pub enum DnaNucleotide {
@@ -226,12 +226,32 @@ impl StringParsable for Protein {
 //     T::parse_string(&f)
 // }
 
+fn transcribe_base(base: &DnaNucleotide) -> RnaNucleotide {
+    match base {
+        DnaNucleotide::A => RnaNucleotide::A,
+        DnaNucleotide::C => RnaNucleotide::C,
+        DnaNucleotide::G => RnaNucleotide::G,
+        DnaNucleotide::T => RnaNucleotide::U,
+    }
+}
+
+// Can't make return type RnaIter because type alias locks to a concrete type
+// and so can't be used with different closures.
+// https://stackoverflow.com/questions/57937436/how-to-alias-an-impl-trait
+pub fn transcribe<'a>(seq: DnaIter<'a>) -> impl Iterator<Item = RnaNucleotide> + 'a
+where
+    DnaIter<'a>: 'a,
+{
+    seq.map(|b| transcribe_base(&b))
+}
+
 pub fn read_string_file(path: &str) -> String {
     let file = fs::read_to_string(path).expect("File not found.");
     file.to_uppercase().trim().to_string()
 }
 
 //   TODO: using a named tuple struct added some complexity to the ownership stucture.
+
 //   For now just using simple 3-ples
 // struct Codon(RnaNucleotide, RnaNucleotide, RnaNucleotide);
 
@@ -318,37 +338,32 @@ pub fn translate_codon(codon: (&RnaNucleotide, &RnaNucleotide, &RnaNucleotide)) 
     }
 }
 
-pub fn translate<'a>(seq: RnaIter<'a>) -> impl Iterator<Item = AminoAcid> + 'a
-where
-    RnaIter<'a>: 'a,
-{
-    seq.chunks(3).into_iter().map(|chunk| 
-        translate_codon((
-            //TODO: error message if non multiple of 3 length
-            &chunk.next().unwrap(),
-            &chunk.next().unwrap(),
-            &chunk.next().unwrap(),
-        ))
-    )
+struct Translator<I: Iterator<Item = RnaNucleotide>> {
+    inner: I,
 }
 
-fn transcribe_base(base: &DnaNucleotide) -> RnaNucleotide {
-    match base {
-        DnaNucleotide::A => RnaNucleotide::A,
-        DnaNucleotide::C => RnaNucleotide::C,
-        DnaNucleotide::G => RnaNucleotide::G,
-        DnaNucleotide::T => RnaNucleotide::U,
+impl<I: Iterator<Item = RnaNucleotide>> Iterator for Translator<I> {
+    type Item = AminoAcid;
+    fn next(&mut self) -> Option<AminoAcid> {
+        let s1 = match self.inner.next() {
+            Some(s) => s,
+            None => return None,
+        };
+        let err_msg = "Cannot translate: sequence is not divisible by 3";
+        let s2 = self.inner.next().expect(err_msg);
+        let s3 = self.inner.next().expect(err_msg);
+        Some(translate_codon((&s1, &s2, &s3)))
     }
 }
 
-// Can't make return type RnaIter because type alias locks to a concrete type
-// and so can't be used with different closures.
-// https://stackoverflow.com/questions/57937436/how-to-alias-an-impl-trait
-pub fn transcribe<'a>(seq: DnaIter<'a>) -> impl Iterator<Item = RnaNucleotide> + 'a
-where
-    DnaIter<'a>: 'a,
-{
-    seq.map(|b| transcribe_base(&b))
+trait TranscribeIteratorExt: Iterator<Item = RnaNucleotide> + Sized {
+    fn translate(self) -> Translator<Self>;
+}
+
+impl<I: Iterator<Item = RnaNucleotide>> TranscribeIteratorExt for I {
+    fn translate(self) -> Translator<Self> {
+        Translator { inner: self }
+    }
 }
 
 pub fn reverse_complement<T: Nucleotide>(
@@ -373,21 +388,33 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_translate() {
-        let string = "AUGGCCAUGGCGCCCAGAACUGAGAUCAAUAGUACCCGUAUUAACGGGUGA".to_string();
-        let test_rna = Rna::parse_string(&string);
-        let answer: Protein = translate(test_rna).collect();
-        let answer = answer.to_string();
-        assert_eq!(answer, "MAMAPRTEINSTRING|")
-    }
-
-    #[test]
     fn test_trascribe() {
         let string = "GATGGAACTTGACTACGTAAATT".to_string();
         let seq = Dna::parse_string(&string);
         let answer: Rna = transcribe(seq).collect();
         let answer = answer.to_string();
         assert_eq!(answer, "GAUGGAACUUGACUACGUAAAUU");
+        let string = "GATGGAACTTGACTACGTAAATTT".to_string();
+        let seq = Dna::parse_string(&string);
+        let answer = transcribe(seq).translate();
+        let _: Protein = answer.collect();
+    }
+
+    #[test]
+    fn test_translate() {
+        let string = "AUGGCCAUGGCGCCCAGAACUGAGAUCAAUAGUACCCGUAUUAACGGGUGA".to_string();
+        let test_rna = Rna::parse_string(&string);
+        let answer: Protein = test_rna.translate().collect();
+        let answer = answer.to_string();
+        assert_eq!(answer, "MAMAPRTEINSTRING|");
+    }
+
+    #[test]
+    #[should_panic(expected = "Cannot translate: sequence is not divisible by 3")]
+    fn test_non_mod_3_rna_translate() {
+        let string = "AUGGCCAUGGCGCCCAGAACUGAGAUCAAUAGUACCCGUAUUAACGGGUG".to_string();
+        let test_rna = Rna::parse_string(&string);
+        let _protein_iter: Protein = test_rna.translate().collect();
     }
 
     #[test]
