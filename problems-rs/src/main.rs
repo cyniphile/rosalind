@@ -68,9 +68,9 @@ fn main() {
     println!();
     let seqs  = read_string_file("problems-rs/data/rosalind_hamm.txt");
     let seqs = seqs.lines();
-    let mut seqs = seqs.map(|s| Dna::parse_string(s));
+    let mut seqs = seqs.map( Dna::parse_string);
     let answer = hamming_distance(seqs.next().unwrap(), seqs.next().unwrap());
-    println!("{}", answer.to_string());
+    println!("{}", answer);
     println!();
     println!("IPRB");
     println!();
@@ -82,8 +82,6 @@ fn main() {
     assert_eq!(split.len(), 3);
     let answer = get_prob_dominant_phenotype(split[0], split[1], split[2]);
     println!("{}", answer);
-
-
 }
 
 #[cfg(test)]

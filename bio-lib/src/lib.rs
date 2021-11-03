@@ -1,6 +1,7 @@
 #![feature(type_alias_impl_trait)]
 #![feature(generic_associated_types)]
 
+// TODO: set up profiling and parallelize with Rayon
 use std::{collections::HashMap, fs};
 
 #[derive(PartialEq, Eq, Hash)]
@@ -85,7 +86,7 @@ pub trait StringParsable {
     type Iter<'a>;
     // TODO: should be way to have default implementations of parse/to _string
     // So far causing type problems
-    fn parse_string<'a>(seq: &'a str) -> Self::Iter<'a>;
+    fn parse_string(seq: &str) -> Self::Iter<'_>;
     fn parse_char(c: &char) -> Self::Item;
     fn to_string(&self) -> String;
     fn to_char(c: &Self::Item) -> char;
@@ -104,7 +105,7 @@ impl StringParsable for Dna {
             _ => panic!("\"{}\" is not a recognized DNA base.", c),
         }
     }
-    fn parse_string<'a>(seq: &'a str) -> DnaIter {
+    fn parse_string(seq: &str) -> DnaIter {
         seq.chars().map(|c| Self::parse_char(&c))
     }
     fn to_char(c: &DnaNucleotide) -> char {
@@ -362,7 +363,7 @@ where
 {
     let counts = HashMap::new();
     seq.fold(counts, |mut acc, item| {
-        *acc.entry(item).or_insert(0) += 1 as u32;
+        *acc.entry(item).or_insert(0) += 1;
         acc
     })
 }
