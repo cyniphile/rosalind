@@ -82,6 +82,7 @@ fn main() {
     assert_eq!(split.len(), 3);
     let answer = get_prob_dominant_phenotype(split[0], split[1], split[2]);
     println!("{}", answer);
+
 }
 
 #[cfg(test)]

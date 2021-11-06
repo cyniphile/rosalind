@@ -1,4 +1,5 @@
 Five levels of bioinformatics programming
+pypy?
 
 # python
 - using the Pyo3 crate https://github.com/PyO3/pyo3 to call all our rust code from python. This way we can 1) gather all the profiling tests into one python script and 2) test out the (possibly?) practical use case of using rust to speed up part of a python project.
