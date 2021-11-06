@@ -3,4 +3,5 @@
 members = [
 	"problems-rs",
 	"bio-lib",
+	"bio-lib-string-rs"
 ]
