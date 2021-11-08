@@ -8,12 +8,12 @@ authors = ["Luke Schiefelbein <luke.schiefelbein@gmail.com>"]
 python = "^3.8"
 jupyter = "^1.0.0"
 pandas = "^1.2.4"
-bio-tools = "^0.1.0"
 pytest = "^6.2.4"
 seaborn = "^0.11.1"
 statsmodels = "^0.12.2"
 sklearn = "^0.0"
 maturin = "^0.11.5"
+bio-lib-py = {path = "bio-lib-py"}
 
 [tool.poetry.dev-dependencies]
 autopep8 = "^1.5.7"
