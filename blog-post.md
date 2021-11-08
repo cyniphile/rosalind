@@ -45,6 +45,26 @@ To test this out, lets make the operation we want to do more complex. Still o(n)
 not implenenting in rust is actually pretty similar to python in this case, only the mandator types in the function defs but the rest are inferred. (Note I wanted to try out pythons 3.10s nice new pattern matching, but I could not install some of my dependencies and it seems still unstable, so I had to go back to 3.9) We use structs in rust and dataclasses in python, because using tuples + comments telling you what the two numbers inside are is obviously worse.
 
 
+Using python is 8ms, python calling rust is 6ms (20% faster) and using rust by itself is ... 0.5 ms!
+
+```
+running 1 test
+test tests::bench_find_reverse_palindomes ... bench:     559,390 ns/iter (+/- 19,835)
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 1 measured; 6 filtered out; finished in 5.24s
+
+
+running 1 test
+test tests::bench_find_reverse_palindomes_large ... bench:  53,767,386 ns/iter (+/- 2,758,363)
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 1 measured; 7 filtered out; finished in 16.28s
+```
+
+Note I didn't use rust structs because I didn't want to spend the time figuring out how to pass them to python via pyo3, a downgrade in terms of code structure.
+
+
+
+
 
 
 # rust enums
@@ -62,3 +82,6 @@ not implenenting in rust is actually pretty similar to python in this case, only
 
 # rust par_iter
 https://medium.com/@mjschillawski/quick-and-easy-parallelization-in-python-32cb9027e490
+
+
+https://crates.io/crates/multiversion

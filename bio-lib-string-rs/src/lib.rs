@@ -95,18 +95,22 @@ pub fn translate_rna_to_amino_acids(rna: &str) -> String {
         .collect()
 }
 
+#[pyclass]
 pub struct PalindomeLocation {
     pub start_index: usize,
     pub length: usize,
 }
 
-pub fn find_reverse_palindomes(seq: &str) -> Vec<PalindomeLocation> {
+// pub fn find_reverse_palindomes(seq: &str) -> Vec<PalindomeLocation> {
+
+#[pyfunction]
+pub fn find_reverse_palindomes(seq: &str) -> Vec<[usize; 2]> {
     let min_len = 4;
     let max_len = 12;
     let mut locations = Vec::new();
     // Iterate from start to min_len from the end
-    for i in 0..(seq.len() - (min_len - 1)) {
-        for length in min_len..(max_len) {
+    for i in 0..(seq.len() - min_len + 1) {
+        for length in (min_len..(max_len + 1)).step_by(2) {
             // seq.len() should be hoisted no?
             // it might be fast to access because I think its part of the str
             // smart pointer
@@ -116,12 +120,14 @@ pub fn find_reverse_palindomes(seq: &str) -> Vec<PalindomeLocation> {
             let test_seq = &seq[i..(i + length)];
             if is_reverse_palindrome(test_seq) {
                 // i+1 because rosalind uses 1 index arrays in answer checking
-                locations.push(PalindomeLocation {
-                    start_index: i + 1,
-                    // Cool rust trick: it's matching the variable with name `length`
-                    // to the struct field named `length`
-                    length,
-                })
+                locations.push(
+                    [i + 1, length], //     PalindomeLocation {
+                                     //     start_index: i + 1,
+                                     //     // Cool rust trick: it's matching the variable with name `length`
+                                     //     // to the struct field named `length`
+                                     //     length,
+                                     // }
+                )
             }
         }
     }
@@ -173,15 +179,36 @@ mod tests {
     #[bench]
     fn bench_convert(b: &mut Bencher) {
         let mut d = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
-        d.push("../problems_py/p2/rosalind_rna.txt");
+        d.push("../data/rosalind_rna.txt");
         let seq = read_base_string_file(d.to_str().unwrap());
         b.iter(|| convert_dna_to_rna(&seq));
     }
 
     #[bench]
+    fn bench_find_reverse_palindomes(b: &mut Bencher) {
+        let mut d = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
+        d.push("../data/rosalind_revp.txt");
+        let path = d.to_str().unwrap();
+        let seq = fs::read_to_string(path).expect("Error");
+        let mut seq = seq.lines();
+        seq.next();
+        let seq: Vec<&str> = seq.collect();
+        let seq = seq.join("");
+        b.iter(|| find_reverse_palindomes(&seq));
+    }
+
+    #[bench]
+    fn bench_find_reverse_palindomes_large(b: &mut Bencher) {
+        let mut d = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
+        d.push("../benchmark-data/revp-large.txt");
+        let seq = read_base_string_file(d.to_str().unwrap());
+        b.iter(|| find_reverse_palindomes(&seq));
+    }
+
+    #[bench]
     fn bench_convert_native(b: &mut Bencher) {
         let mut d = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
-        d.push("../problems_py/p2/rosalind_rna.txt");
+        d.push("../data/rosalind_rna.txt");
         let seq = read_base_string_file(d.to_str().unwrap());
         b.iter(|| convert_dna_to_rna_native(&seq));
     }
@@ -206,10 +233,10 @@ mod tests {
     fn test_find_reverse_palindomes() {
         let seq = "TCAATGCATGCGGGTCTATATGCAT";
         let test_answer = find_reverse_palindomes(seq);
-        let test_answer: Vec<[usize; 2]> = test_answer
-            .iter()
-            .map(|p| [p.start_index, p.length])
-            .collect();
+        // let test_answer: Vec<[usize; 2]> = test_answer
+        // .iter()
+        // .map(|p| [p.start_index, p.length])
+        // .collect();
         let true_answer = vec![
             [4, 6],
             [5, 4],
@@ -228,5 +255,7 @@ mod tests {
 fn bio_lib_string_rs(_py: Python, m: &PyModule) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(convert_dna_to_rna, m)?)?;
     m.add_function(wrap_pyfunction!(convert_dna_to_rna_native, m)?)?;
+    m.add_function(wrap_pyfunction!(find_reverse_palindomes, m)?)?;
+    m.add_class::<PalindomeLocation>()?;
     Ok(())
 }

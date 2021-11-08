@@ -28,7 +28,7 @@ fn main() {
     println!("==================================");
     println!("DNA");
     println!();
-    let file = read_string_file("problems-rs/data/rosalind_dna.txt");
+    let file = read_string_file("data/rosalind_dna.txt");
     let file = Dna::parse_string(&file);
 
     let answer = base_counts(file);
@@ -45,28 +45,28 @@ fn main() {
     println!();
     println!("RNA");
     println!();
-    let input = read_string_file("problems-rs/data/rosalind_rna.txt");
+    let input = read_string_file("data/rosalind_rna.txt");
     let input = Dna::parse_string(&input);
     let answer: Rna = convert_dna_to_rna(input).collect();
     println!("{}", answer.to_string());
     println!();
     println!("REVC");
     println!();
-    let input = read_string_file("problems-rs/data/rosalind_revc.txt");
+    let input = read_string_file("data/rosalind_revc.txt");
     let input = Dna::parse_string(&input);
     let answer: Dna = reverse_complement(input).collect();
     println!("{}", answer.to_string());
     println!();
     println!("PROT");
     println!();
-    let input = read_string_file("problems-rs/data/rosalind_prot.txt");
+    let input = read_string_file("data/rosalind_prot.txt");
     let input: RnaIter = Rna::parse_string(&input);
     let answer: Protein = input.translate().collect();
     println!("{}", answer.to_string());
     println!();
     println!("HAMM");
     println!();
-    let seqs  = read_string_file("problems-rs/data/rosalind_hamm.txt");
+    let seqs  = read_string_file("data/rosalind_hamm.txt");
     let seqs = seqs.lines();
     let mut seqs = seqs.map( Dna::parse_string);
     let answer = hamming_distance(seqs.next().unwrap(), seqs.next().unwrap());
@@ -74,7 +74,7 @@ fn main() {
     println!();
     println!("IPRB");
     println!();
-    let input = read_string_file("problems-rs/data/rosalind_iprb.txt");
+    let input = read_string_file("data/rosalind_iprb.txt");
     let split: Vec<i32> = input
         .split_whitespace()
         .map(|s| s.parse::<i32>().unwrap())

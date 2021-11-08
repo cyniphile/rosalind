@@ -1,12 +1,15 @@
+import numpy as np
 from dataclasses import dataclass
+from typing import List
+import numpy.typing as npt
+
 import pytest
 import bio_lib_string_rs
-from typing import List
 
 
 @pytest.fixture(scope="session")
 def example_data():
-    with open('./problems_py/p2/rosalind_rna.txt') as f:
+    with open('./data/rosalind_rna.txt') as f:
         dna = f.read().strip()
     return [dna]
 
