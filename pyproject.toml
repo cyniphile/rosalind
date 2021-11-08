@@ -5,7 +5,7 @@ description = ""
 authors = ["Luke Schiefelbein <luke.schiefelbein@gmail.com>"]
 
 [tool.poetry.dependencies]
-python = "^3.9"
+python = "^3.8"
 jupyter = "^1.0.0"
 pandas = "^1.2.4"
 bio-tools = "^0.1.0"
@@ -13,10 +13,42 @@ pytest = "^6.2.4"
 seaborn = "^0.11.1"
 statsmodels = "^0.12.2"
 sklearn = "^0.0"
+maturin = "^0.11.5"
 
 [tool.poetry.dev-dependencies]
 autopep8 = "^1.5.7"
+pytest-benchmark = "^3.4.1"
+mypy = "^0.910"
+ipdb = "^0.13.9"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.mypy]
+plugins = "numpy.typing.mypy_plugin"
+exclude = ["tests/", ".venv/", "problems_py/"]
+# Disallow dynamic typing
+disallow_any_unimported = true 
+disallow_any_expr = true
+disallow_any_decorated = true
+disallow_any_generics = true
+disallow_any_explicit = true
+disallow_subclassing_any = true
+# Disallow untyped definitions and calls
+disallow_untyped_calls = true
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+check_untyped_defs = true
+disallow_untyped_decorators = true
+# None and optional handling
+no_implicit_optional = true
+# Configuring warnings
+warn_unused_ignores = true
+warn_no_return = true
+warn_return_any = true
+warn_redundant_casts = true
+# Misc things
+strict_equality = true
+# Config file
+warn_unused_configs = true

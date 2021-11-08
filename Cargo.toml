@@ -1,8 +1,7 @@
 [workspace]
 
 members = [
-	"p1",
-	"p2",
+	"problems-rs",
 	"bio-lib",
-	"mendels1stlaw"
+	"bio-lib-string-rs"
 ]

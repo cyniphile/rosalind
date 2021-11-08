@@ -93,7 +93,8 @@ def best_delta_for_s(s, Mssv, Assv):
                 try:
                     sigma1 = Mssv[i] + Assv[j]
                 except IndexError:
-                    import pdb; pdb.set_trace()
+                    import pdb
+                    pdb.set_trace()
                 d = sigma1 - s
                 sigma2 = Mssv[i - 1] + Assv[j]
                 dd = sigma2 - s
