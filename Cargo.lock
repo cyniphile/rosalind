@@ -18,7 +18,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "50ae17cabbc8a38a1e3e4c1a6a664e9a09672dc14d0896fa8d865d3a5a446b07"
 
 [[package]]
-name = "bio-lib"
+name = "bio-lib-rs"
 version = "0.1.0"
 dependencies = [
  "bimap",
@@ -123,7 +123,7 @@ checksum = "692fcb63b64b1758029e0a96ee63e049ce8c5948587f2f7208df04625e5f6b56"
 name = "p2"
 version = "0.1.0"
 dependencies = [
- "bio-lib",
+ "bio-lib-rs",
 ]
 
 [[package]]

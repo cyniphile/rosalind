@@ -1,7 +1,25 @@
-Five levels of bioinformatics programming
+Five Levels of Programming in Bioinformatics
+=========================================
+
+# TODO:
 pypy?
 
+---------------
+
+I've decided I want to make the switch from "data science" (whatever that means amirite?) to bioinformatics. I think a lot of my data skills will transfer over seamlessly to a new domain, but I've also been trying to learn more about biology by going through a list of I found on LinkedIn https://www.linkedin.com/pulse/how-learn-bioinformatics-4catalyzers-eric-jonathan-rothberg/ Rosalind [rosalind.info]. They are basically Euler https://projecteuler.net/archives problems with a biology flair. I started out solving them in Python, the language I know best, but figured this would be a perfect opportunity to drop try out Rust to see if I can get some nice speed boosts with decent usability. That's Rust is supposed to be about. 
+
 # python
+
+Let's solve the 
+
+
+
+
+
+
+
+
+
 - using the Pyo3 crate https://github.com/PyO3/pyo3 to call all our rust code from python. This way we can 1) gather all the profiling tests into one python script and 2) test out the (possibly?) practical use case of using rust to speed up part of a python project.
 - Installing and using pyo3, maturin papercuts using their instructions
 	- needed to add a mysterious config to get it to compile on mac: https://stackoverflow.com/questions/28124221/error-linking-with-cc-failed-exit-code-1
@@ -16,7 +34,7 @@ pypy?
 # rust strings
 - what is rust
 - writing this first code was slow because I didn't know rust at all
-- The rust book is very good. Rust is not garbage collected, but the compiler helps you manually manage memory, and as such requires you to write some extra annotations on variables ownership, which functions are using them and how long they are supposed to live (borrowing and lifetimes). I've seen it called "semiautomatic memory management" (as opposed to C/C++ where you have to just know and remember how to manage memory). There are also other low level aspects (usize, int32, etc vs int, strings very complicated). While some of this is rust, part of it is systems programming. Rust is like bowling with the bumpers: can be maddening to be alwys bouncing back and forth down the lane but eventually I will knock some pins over, vs C++ where i'd immideately be in a gutter of weird memory issues.
+- The rust book is very good. Rust is not garbage collected, but the compiler helps you manually manage memory, and as such requires you, the programmer, to write some extra bookeeping anntations on variables' ownership, which functions are using them and how long they are supposed to live ("borrowing" and "lifetimes"). I've seen it called "semiautomatic memory management" (as opposed to C/C++ where you have to just know and remember how to manage memory). There are also other low level aspects (usize, int32, etc vs int, strings very complicated). While some of this is rust, part of it is systems programming. Rust is like bowling with the bumpers: can be maddening to be alwys bouncing back and forth down the lane but eventually I will knock some pins over, vs C++ where i'd immideately be in a gutter of weird memory issues.
 - With py03 installed the project become pretty slow to compile ~22s (a known problem with rust).
 - First test rust is about 30% _slower_! Maybe there's just some overhead, so let's make the file really big? Nope still 
 - Try rust only: 
@@ -49,19 +67,20 @@ Using python is 8ms, python calling rust is 6ms (20% faster) and using rust by i
 
 ```
 running 1 test
-test tests::bench_find_reverse_palindomes ... bench:     559,390 ns/iter (+/- 19,835)
+test tests::bench_find_reverse_palindromes ... bench:     559,390 ns/iter (+/- 19,835)
 
 test result: ok. 0 passed; 0 failed; 0 ignored; 1 measured; 6 filtered out; finished in 5.24s
 
 
 running 1 test
-test tests::bench_find_reverse_palindomes_large ... bench:  53,767,386 ns/iter (+/- 2,758,363)
+test tests::bench_find_reverse_palindromes_large ... bench:  53,767,386 ns/iter (+/- 2,758,363)
 
 test result: ok. 0 passed; 0 failed; 0 ignored; 1 measured; 7 filtered out; finished in 16.28s
 ```
 
 Note I didn't use rust structs because I didn't want to spend the time figuring out how to pass them to python via pyo3, a downgrade in terms of code structure.
 
+https://developers.redhat.com/blog/2017/11/16/speed-python-using-rust#python_with_itertools
 
 
 
@@ -71,6 +90,8 @@ Note I didn't use rust structs because I didn't want to spend the time figuring 
 - https://www.youtube.com/watch?v=FnBPECrSC7o&ab_channel=JaneStreet
 - enum are a bit tricky because they aren't types
 - Amino acid matching example (completeness and adding novel AAs, vs string code)
+- sort of exist in python but without the key piece of support: pattern matching
+   https://stackoverflow.com/questions/16258553/how-can-i-define-algebraic-data-types-in-python
 
 # rust iters
 - They are fast, and should be even faster when chaining (like spark)

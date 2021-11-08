@@ -224,6 +224,15 @@ fn convert_base(base: &DnaNucleotide) -> RnaNucleotide {
     }
 }
 
+// fn transcribe_base(base: &DnaNucleotide) -> RnaNucleotide {
+//     match base {
+//         DnaNucleotide::A => RnaNucleotide::U,
+//         DnaNucleotide::C => RnaNucleotide::G,
+//         DnaNucleotide::G => RnaNucleotide::C,
+//         DnaNucleotide::T => RnaNucleotide::A,
+//     }
+// }
+
 // Can't make return type RnaIter because type alias locks to a concrete type
 // and so can't be used with different closures.
 // https://stackoverflow.com/questions/57937436/how-to-alias-an-impl-trait

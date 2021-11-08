@@ -1,4 +1,4 @@
-use bio_lib::*;
+use bio_lib_rs::*;
 
 fn get_prob_dominant_phenotype(n_homo_dom: i32, n_hetero: i32, n_homo_recess: i32) -> f32 {
     let n_homo_dom = n_homo_dom as f32;
@@ -6,7 +6,7 @@ fn get_prob_dominant_phenotype(n_homo_dom: i32, n_hetero: i32, n_homo_recess: i3
     let n_homo_recess = n_homo_recess as f32;
     let population = n_homo_dom + n_hetero + n_homo_recess;
     // divide by 2 here and below because we don't care about order
-    //TODO: try optimizing by using bitshifting 
+    //TODO: try optimizing by using bitshifting instead of division
     let all_choices = population * (population - 1.0) / 2.0;
     let combs_homo_dom = n_homo_dom * (n_homo_dom - 1.0) / 2.0; 
     let other_combs_homo_dom = n_homo_dom * (population - n_homo_dom);
@@ -15,9 +15,9 @@ fn get_prob_dominant_phenotype(n_homo_dom: i32, n_hetero: i32, n_homo_recess: i3
     (
         combs_homo_dom
         + other_combs_homo_dom
-        // 3/4 = prob of getting non-homzygous recessive from two hetero parents
+        // 3/4 = prob of getting non-homozygous recessive from two hetero parents
         + (combs_hetero_hetero * 3.0 / 4.0) 
-        // 1/2 = prob of getting non-homzygous recessive from hetero/homo-recessive parents
+        // 1/2 = prob of getting non-homozygous recessive from hetero/homo-recessive parents
         + (combs_hetero_recess / 2.0)
     ) / all_choices
 }

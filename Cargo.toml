@@ -2,6 +2,6 @@
 
 members = [
 	"problems-rs",
-	"bio-lib",
+	"bio-lib-rs",
 	"bio-lib-string-rs"
 ]
