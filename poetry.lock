@@ -71,7 +71,7 @@ description = "Tools for computational biology"
 category = "main"
 optional = false
 python-versions = "^3.8"
-develop = false
+develop = true
 
 [package.dependencies]
 pandas = "^1.2.4"
@@ -1130,7 +1130,7 @@ testing = ["pytest (>=4.6)", "pytest-checkdocs (>=2.4)", "pytest-flake8", "pytes
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.8"
-content-hash = "1955128dfd1e7d6db756738ff0a54ecd515b411e2f58efa34612af657356c470"
+content-hash = "a8bea3e3dbef6c4be4678981a0c5baa7a8461e502706b8ee98471045e68327d9"
 
 [metadata.files]
 appnope = [

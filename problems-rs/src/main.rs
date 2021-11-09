@@ -47,7 +47,7 @@ fn main() {
     println!();
     let input = read_string_file("data/rosalind_rna.txt");
     let input = Dna::parse_string(&input);
-    let answer: Rna = convert_dna_to_rna(input).collect();
+    let answer: Rna = transcribe_dna_to_rna(input).collect();
     println!("{}", answer.to_string());
     println!();
     println!("REVC");

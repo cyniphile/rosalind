@@ -215,7 +215,7 @@ impl StringParsable for Protein {
     }
 }
 
-fn convert_base(base: &DnaNucleotide) -> RnaNucleotide {
+fn trascribe_base(base: &DnaNucleotide) -> RnaNucleotide {
     match base {
         DnaNucleotide::A => RnaNucleotide::A,
         DnaNucleotide::C => RnaNucleotide::C,
@@ -224,23 +224,14 @@ fn convert_base(base: &DnaNucleotide) -> RnaNucleotide {
     }
 }
 
-// fn transcribe_base(base: &DnaNucleotide) -> RnaNucleotide {
-//     match base {
-//         DnaNucleotide::A => RnaNucleotide::U,
-//         DnaNucleotide::C => RnaNucleotide::G,
-//         DnaNucleotide::G => RnaNucleotide::C,
-//         DnaNucleotide::T => RnaNucleotide::A,
-//     }
-// }
-
 // Can't make return type RnaIter because type alias locks to a concrete type
 // and so can't be used with different closures.
 // https://stackoverflow.com/questions/57937436/how-to-alias-an-impl-trait
-pub fn convert_dna_to_rna<'a>(seq: DnaIter<'a>) -> impl Iterator<Item = RnaNucleotide> + 'a
+pub fn transcribe_dna_to_rna<'a>(seq: DnaIter<'a>) -> impl Iterator<Item = RnaNucleotide> + 'a
 where
     DnaIter<'a>: 'a,
 {
-    seq.map(|b| convert_base(&b))
+    seq.map(|b| trascribe_base(&b))
 }
 
 pub fn read_string_file(path: &str) -> String {
@@ -385,11 +376,11 @@ mod tests {
     fn test_convert() {
         let string = "GATGGAACTTGACTACGTAAATT";
         let seq = Dna::parse_string(string);
-        let answer: Rna = convert_dna_to_rna(seq).collect();
+        let answer: Rna = transcribe_dna_to_rna(seq).collect();
         let answer = answer.to_string();
         assert_eq!(answer, "GAUGGAACUUGACUACGUAAAUU");
         let seq = Dna::parse_string(string);
-        let answer = convert_dna_to_rna(seq).translate();
+        let answer = transcribe_dna_to_rna(seq).translate();
         let _: Protein = answer.collect();
     }
 

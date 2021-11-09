@@ -137,7 +137,7 @@ pub fn is_reverse_palindrome(seq: &str) -> bool {
 }
 
 #[pyfunction]
-pub fn convert_dna_to_rna(dna_seq: &str) -> String {
+pub fn transcribe_dna_to_rna(dna_seq: &str) -> String {
     dna_seq
         .chars()
         .map(|x| if x == 'T' { 'U' } else { x })
@@ -145,7 +145,7 @@ pub fn convert_dna_to_rna(dna_seq: &str) -> String {
 }
 
 #[pyfunction]
-pub fn convert_dna_to_rna_native(dna_seq: &str) -> String {
+pub fn transcribe_dna_to_rna_builtin(dna_seq: &str) -> String {
     dna_seq.replace("T", "U")
 }
 
@@ -167,11 +167,35 @@ mod tests {
     }
 
     #[bench]
-    fn bench_convert(b: &mut Bencher) {
+    fn bench_trascribe(b: &mut Bencher) {
         let mut d = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
         d.push("../data/rosalind_rna.txt");
         let seq = read_base_string_file(d.to_str().unwrap());
-        b.iter(|| convert_dna_to_rna(&seq));
+        b.iter(|| transcribe_dna_to_rna(&seq));
+    }
+
+    #[bench]
+    fn bench_transcribe_builtin(b: &mut Bencher) {
+        let mut d = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
+        d.push("../data/rosalind_rna.txt");
+        let seq = read_base_string_file(d.to_str().unwrap());
+        b.iter(|| transcribe_dna_to_rna_builtin(&seq));
+    }
+
+    #[bench]
+    fn bench_trascribe_large(b: &mut Bencher) {
+        let mut d = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
+        d.push("../benchmark-data/rna-large.txt");
+        let seq = read_base_string_file(d.to_str().unwrap());
+        b.iter(|| transcribe_dna_to_rna(&seq));
+    }
+
+    #[bench]
+    fn bench_transcribe_builtin_large(b: &mut Bencher) {
+        let mut d = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
+        d.push("../benchmark-data/rna-large.txt");
+        let seq = read_base_string_file(d.to_str().unwrap());
+        b.iter(|| transcribe_dna_to_rna_builtin(&seq));
     }
 
     #[bench]
@@ -195,20 +219,12 @@ mod tests {
         b.iter(|| find_reverse_palindromes(&seq));
     }
 
-    #[bench]
-    fn bench_convert_native(b: &mut Bencher) {
-        let mut d = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
-        d.push("../data/rosalind_rna.txt");
-        let seq = read_base_string_file(d.to_str().unwrap());
-        b.iter(|| convert_dna_to_rna_native(&seq));
-    }
-
     #[test]
-    fn test_convert() {
+    fn test_transcribe() {
         let seq = "GATGGAACTTGACTACGTAAATT".to_string();
-        let answer = convert_dna_to_rna(&seq);
+        let answer = transcribe_dna_to_rna(&seq);
         assert_eq!(answer, "GAUGGAACUUGACUACGUAAAUU");
-        let answer = convert_dna_to_rna_native(&seq);
+        let answer = transcribe_dna_to_rna_builtin(&seq);
         assert_eq!(answer, "GAUGGAACUUGACUACGUAAAUU");
     }
 
@@ -244,8 +260,8 @@ mod tests {
 
 #[pymodule]
 fn bio_lib_string_rs(_py: Python, m: &PyModule) -> PyResult<()> {
-    m.add_function(wrap_pyfunction!(convert_dna_to_rna, m)?)?;
-    m.add_function(wrap_pyfunction!(convert_dna_to_rna_native, m)?)?;
+    m.add_function(wrap_pyfunction!(transcribe_dna_to_rna, m)?)?;
+    m.add_function(wrap_pyfunction!(transcribe_dna_to_rna_builtin, m)?)?;
     m.add_function(wrap_pyfunction!(find_reverse_palindromes, m)?)?;
     m.add_class::<PalindromeLocation>()?;
     Ok(())
