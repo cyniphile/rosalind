@@ -8,7 +8,7 @@ I've decided I want to make the switch from "data science" (whatever that means 
 For example, in the second Rosalind [problem](http://rosalind.info/problems/rna/) we transcribe[^3] DNA to RNA. This is a one-liner in Python:
 
 ``` python
-# python hand rolled
+# python hand-rolled
 def transcribe_dna_to_rna(s: str) -> str:
     return ''.join(["U" if char == 'T' else char for char in s])
 ```
@@ -31,7 +31,7 @@ The [Rust book](https://doc.rust-lang.org/book/) is a very good resource for lea
 
 ## Rust Implementation
 
-The Rust implementation is pretty similar to the Python one (especially since we used Python type hints), except for the `&` borrow notation and the `.collect()` we have to explicitly call on the `.chars` iterator (more on iterators in another post).  
+The Rust implementation is pretty similar to the Python one (especially since we used Python type hints), except for the `&` borrow notation and the `.collect` we have to explicitly call on the `.chars` iterator (more on iterators in another post).  
 
 ``` rust
 // rust hand rolled
@@ -109,7 +109,7 @@ This chart (and subsequent such charts) were made using a [`perfplot`](https://g
 
 ## Actually Speeding Something Up
 
-Let try out a more custom task that isn't a Python built-in. This next Rosalind problem is to [identify reverse palindromes](http://rosalind.info/problems/revp/) in a DNA sequence.[^6] 
+Let's try out a more custom task that isn't a Python built-in. This next Rosalind problem is to [identify reverse palindromes](http://rosalind.info/problems/revp/) in a DNA sequence.[^6] 
 
 ``` python
 @dataclass
