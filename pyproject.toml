@@ -14,6 +14,7 @@ statsmodels = "^0.12.2"
 sklearn = "^0.0"
 maturin = "^0.11.5"
 bio-lib-py = {path = "bio-lib-py", develop = true}
+perfplot = "^0.9.11"
 
 [tool.poetry.dev-dependencies]
 autopep8 = "^1.5.7"
@@ -21,6 +22,7 @@ pytest-benchmark = "^3.4.1"
 mypy = "^0.910"
 ipdb = "^0.13.9"
 pandas-stubs = "^1.2.0"
+py-spy = "^0.3.10"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

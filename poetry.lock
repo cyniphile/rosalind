@@ -113,6 +113,17 @@ optional = false
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*"
 
 [[package]]
+name = "commonmark"
+version = "0.9.1"
+description = "Python parser for the CommonMark Markdown spec"
+category = "main"
+optional = false
+python-versions = "*"
+
+[package.extras]
+test = ["flake8 (==3.7.8)", "hypothesis (==3.55.3)"]
+
+[[package]]
 name = "cycler"
 version = "0.11.0"
 description = "Composable style cycles"
@@ -143,6 +154,18 @@ description = "XML bomb protection for Python stdlib modules"
 category = "main"
 optional = false
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*"
+
+[[package]]
+name = "dufte"
+version = "0.2.28"
+description = "Clean matplotlib plots"
+category = "main"
+optional = false
+python-versions = ">=3.6"
+
+[package.dependencies]
+matplotlib = "*"
+numpy = "*"
 
 [[package]]
 name = "entrypoints"
@@ -683,6 +706,20 @@ six = "*"
 test = ["pytest", "pytest-cov", "scipy"]
 
 [[package]]
+name = "perfplot"
+version = "0.9.11"
+description = "Performance plots for Python code snippets"
+category = "main"
+optional = false
+python-versions = ">=3.7"
+
+[package.dependencies]
+dufte = ">=0.2.20"
+matplotlib = "*"
+numpy = "*"
+rich = "*"
+
+[[package]]
 name = "pexpect"
 version = "4.8.0"
 description = "Pexpect allows easy control of interactive console applications."
@@ -763,6 +800,14 @@ python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*"
 name = "py-cpuinfo"
 version = "8.0.0"
 description = "Get CPU info with pure Python 2 & 3"
+category = "dev"
+optional = false
+python-versions = "*"
+
+[[package]]
+name = "py-spy"
+version = "0.3.10"
+description = "Sampling profiler for Python programs"
 category = "dev"
 optional = false
 python-versions = "*"
@@ -921,6 +966,22 @@ description = "Provides an abstraction layer on top of the various Qt bindings (
 category = "main"
 optional = false
 python-versions = ">=2.7,!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*,!=3.4.*,!=3.5.*"
+
+[[package]]
+name = "rich"
+version = "10.13.0"
+description = "Render rich text, tables, progress bars, syntax highlighting, markdown and more to the terminal"
+category = "main"
+optional = false
+python-versions = ">=3.6.2,<4.0.0"
+
+[package.dependencies]
+colorama = ">=0.4.0,<0.5.0"
+commonmark = ">=0.9.0,<0.10.0"
+pygments = ">=2.6.0,<3.0.0"
+
+[package.extras]
+jupyter = ["ipywidgets (>=7.5.1,<8.0.0)"]
 
 [[package]]
 name = "scikit-learn"
@@ -1130,7 +1191,7 @@ testing = ["pytest (>=4.6)", "pytest-checkdocs (>=2.4)", "pytest-flake8", "pytes
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.8"
-content-hash = "a8bea3e3dbef6c4be4678981a0c5baa7a8461e502706b8ee98471045e68327d9"
+content-hash = "cd3680276d7808b0070bc86f3db14733f859cbedbda45d60fa2a74b5fb1c4d80"
 
 [metadata.files]
 appnope = [
@@ -1227,6 +1288,10 @@ colorama = [
     {file = "colorama-0.4.4-py2.py3-none-any.whl", hash = "sha256:9f47eda37229f68eee03b24b9748937c7dc3868f906e8ba69fbcbdd3bc5dc3e2"},
     {file = "colorama-0.4.4.tar.gz", hash = "sha256:5941b2b48a20143d2267e95b1c2a7603ce057ee39fd88e7329b0c292aa16869b"},
 ]
+commonmark = [
+    {file = "commonmark-0.9.1-py2.py3-none-any.whl", hash = "sha256:da2f38c92590f83de410ba1a3cbceafbc74fee9def35f9251ba9a971d6d66fd9"},
+    {file = "commonmark-0.9.1.tar.gz", hash = "sha256:452f9dc859be7f06631ddcb328b6919c67984aca654e5fefb3914d54691aed60"},
+]
 cycler = [
     {file = "cycler-0.11.0-py3-none-any.whl", hash = "sha256:3a27e95f763a428a739d2add979fa7494c912a32c17c4c38c4d5f082cad165a3"},
     {file = "cycler-0.11.0.tar.gz", hash = "sha256:9c87405839a19696e837b3b818fed3f5f69f16f1eec1a1ad77e043dcea9c772f"},
@@ -1261,6 +1326,10 @@ decorator = [
 defusedxml = [
     {file = "defusedxml-0.7.1-py2.py3-none-any.whl", hash = "sha256:a352e7e428770286cc899e2542b6cdaedb2b4953ff269a210103ec58f6198a61"},
     {file = "defusedxml-0.7.1.tar.gz", hash = "sha256:1bb3032db185915b62d7c6209c5a8792be6a32ab2fedacc84e01b52c51aa3e69"},
+]
+dufte = [
+    {file = "dufte-0.2.28-py3-none-any.whl", hash = "sha256:5edc228e6816510e0bdec9c502ebdc3e05fb74afed4978951846f680b245e9f6"},
+    {file = "dufte-0.2.28.tar.gz", hash = "sha256:f3deb8fecd63b81cf3d34f6d05236806aa2b9a499399563fe42f9a074d7a0db2"},
 ]
 entrypoints = [
     {file = "entrypoints-0.3-py2.py3-none-any.whl", hash = "sha256:589f874b313739ad35be6e0cd7efde2a4e9b6fea91edcc34e58ecbb8dbe56d19"},
@@ -1585,6 +1654,10 @@ patsy = [
     {file = "patsy-0.5.2-py2.py3-none-any.whl", hash = "sha256:cc80955ae8c13a7e7c4051eda7b277c8f909f50bc7d73e124bc38e2ee3d95041"},
     {file = "patsy-0.5.2.tar.gz", hash = "sha256:5053de7804676aba62783dbb0f23a2b3d74e35e5bfa238b88b7cbf148a38b69d"},
 ]
+perfplot = [
+    {file = "perfplot-0.9.11-py3-none-any.whl", hash = "sha256:812d917c31f6c34a767866e320053ef23655386c465e99b6850a528e42133ae6"},
+    {file = "perfplot-0.9.11.tar.gz", hash = "sha256:6d44837b302ebd0425639604b3cbbd64af1152005f8576b778474a858af0b6b8"},
+]
 pexpect = [
     {file = "pexpect-4.8.0-py2.py3-none-any.whl", hash = "sha256:0b48a55dcb3c05f3329815901ea4fc1537514d6ba867a152b581d69ae3710937"},
     {file = "pexpect-4.8.0.tar.gz", hash = "sha256:fc65a43959d153d0114afe13997d439c22823a27cefceb5ff35c2178c6784c0c"},
@@ -1658,6 +1731,16 @@ py = [
 ]
 py-cpuinfo = [
     {file = "py-cpuinfo-8.0.0.tar.gz", hash = "sha256:5f269be0e08e33fd959de96b34cd4aeeeacac014dd8305f70eb28d06de2345c5"},
+]
+py-spy = [
+    {file = "py_spy-0.3.10-py2.py3-none-macosx_10_7_x86_64.whl", hash = "sha256:2b33826e03054ca1adef151dcb53f0209158418ba1cb527d70ea2e60f82ebd59"},
+    {file = "py_spy-0.3.10-py2.py3-none-macosx_10_9_x86_64.macosx_11_0_arm64.macosx_10_9_universal2.whl", hash = "sha256:0912c5f6583773a51dd4305d987ae716258d8286da2baffa5347ea91018d3aaf"},
+    {file = "py_spy-0.3.10-py2.py3-none-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:48431c8a4ebf1f7806582462c0e67cb9cf2457c1a5e63ab6e1b335fcf560597f"},
+    {file = "py_spy-0.3.10-py2.py3-none-manylinux_2_17_armv7l.manylinux2014_armv7l.whl", hash = "sha256:50c9c27194d5393a70a7e5ae21c19c8f0e481adac64d8c21bb06d50980ea4739"},
+    {file = "py_spy-0.3.10-py2.py3-none-manylinux_2_5_i686.manylinux1_i686.whl", hash = "sha256:a38cc9c6f209c289478fa3c65ce9a8efe64b9f9c3dadadd475be8f28441d0e90"},
+    {file = "py_spy-0.3.10-py2.py3-none-manylinux_2_5_x86_64.manylinux1_x86_64.whl", hash = "sha256:baa6b2f7f5b6ec2c9192eb0046b953969a153ce784f6c4bd96a8a69f4ebeca40"},
+    {file = "py_spy-0.3.10-py2.py3-none-win_amd64.whl", hash = "sha256:d52702f0af84602ada3eba2a99c3f4a6a3194aa7629f01a23ad7f0981bc43c3c"},
+    {file = "py_spy-0.3.10.tar.gz", hash = "sha256:89a0ce8e2e9981847404e2c32c8117a663e4b5a2070965e93287960d1ae9df4a"},
 ]
 pycodestyle = [
     {file = "pycodestyle-2.8.0-py2.py3-none-any.whl", hash = "sha256:720f8b39dde8b293825e7ff02c475f3077124006db4f440dcbc9a20b76548a20"},
@@ -1790,6 +1873,10 @@ qtconsole = [
 qtpy = [
     {file = "QtPy-1.11.2-py2.py3-none-any.whl", hash = "sha256:83c502973e9fdd7b648d8267a421229ea3d9a0651c22e4c65a4d9228479c39b6"},
     {file = "QtPy-1.11.2.tar.gz", hash = "sha256:d6e4ae3a41f1fcb19762b58f35ad6dd443b4bdc867a4cb81ef10ccd85403c92b"},
+]
+rich = [
+    {file = "rich-10.13.0-py3-none-any.whl", hash = "sha256:96d15285b64dbf8154e0717298d2fdfdbbe03da26a392632c23820068f06c3b3"},
+    {file = "rich-10.13.0.tar.gz", hash = "sha256:d80fc76f34d819c481a48f73ec9ac396bed3bd6a16ecd57f9e0654cd89a8fb56"},
 ]
 scikit-learn = [
     {file = "scikit-learn-1.0.1.tar.gz", hash = "sha256:ac2ca9dbb754d61cfe1c83ba8483498ef951d29b93ec09d6f002847f210a99da"},

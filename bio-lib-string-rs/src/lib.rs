@@ -3,6 +3,8 @@ extern crate test;
 use pyo3::prelude::*;
 use std::fs;
 
+// TODO: Move all test data files to a fixtures folder
+
 pub fn read_base_string_file(path: &str) -> String {
     let file = fs::read_to_string(path).expect("Can't find file");
     file.to_uppercase().trim().to_string()
@@ -107,23 +109,47 @@ pub struct PalindromeLocation {
 pub fn find_reverse_palindromes(seq: &str) -> Vec<PalindromeLocation> {
     let min_len = 4;
     let max_len = 12;
+    seq.chars()
+        // Iterate from start to min_len from the end
+        .take(seq.len() - min_len + 1)
+        .enumerate()
+        .fold(Vec::new(), |mut acc, (i, _)| {
+            for length in (min_len..(max_len + 1)).step_by(2) {
+                // seq.len() should be hoisted no?
+                // it might be fast to access because I think its part of the str
+                // smart pointer
+                if i + length > seq.len() {
+                    continue;
+                }
+                let test_seq = &seq[i..(i + length)];
+                if is_reverse_palindrome(test_seq) {
+                    acc.push(PalindromeLocation {
+                        // i+1 because rosalind uses 1 indexed arrays in answer checking
+                        start_index: i + 1,
+                        // Cool rust trick: it's matching the variable with name `length`
+                        // to the struct field named `length`
+                        length,
+                    });
+                }
+            }
+            acc
+        })
+}
+
+#[pyfunction]
+pub fn find_reverse_palindromes_old(seq: &str) -> Vec<PalindromeLocation> {
+    let min_len = 4;
+    let max_len = 12;
     let mut locations = Vec::new();
-    // Iterate from start to min_len from the end
     for i in 0..(seq.len() - min_len + 1) {
         for length in (min_len..(max_len + 1)).step_by(2) {
-            // seq.len() should be hoisted no?
-            // it might be fast to access because I think its part of the str
-            // smart pointer
             if i + length > seq.len() {
                 continue;
             }
             let test_seq = &seq[i..(i + length)];
             if is_reverse_palindrome(test_seq) {
-                // i+1 because rosalind uses 1 indexed arrays in answer checking
                 locations.push(PalindromeLocation {
                     start_index: i + 1,
-                    // Cool rust trick: it's matching the variable with name `length`
-                    // to the struct field named `length`
                     length,
                 })
             }
@@ -169,7 +195,7 @@ mod tests {
     #[bench]
     fn bench_trascribe(b: &mut Bencher) {
         let mut d = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
-        d.push("../data/rosalind_rna.txt");
+        d.push("../test-data/rosalind_rna.txt");
         let seq = read_base_string_file(d.to_str().unwrap());
         b.iter(|| transcribe_dna_to_rna(&seq));
     }
@@ -177,7 +203,7 @@ mod tests {
     #[bench]
     fn bench_transcribe_builtin(b: &mut Bencher) {
         let mut d = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
-        d.push("../data/rosalind_rna.txt");
+        d.push("../test-data/rosalind_rna.txt");
         let seq = read_base_string_file(d.to_str().unwrap());
         b.iter(|| transcribe_dna_to_rna_builtin(&seq));
     }
@@ -185,7 +211,7 @@ mod tests {
     #[bench]
     fn bench_trascribe_large(b: &mut Bencher) {
         let mut d = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
-        d.push("../benchmark-data/rna-large.txt");
+        d.push("../test-data/benchmark-data/rna-large.txt");
         let seq = read_base_string_file(d.to_str().unwrap());
         b.iter(|| transcribe_dna_to_rna(&seq));
     }
@@ -193,7 +219,7 @@ mod tests {
     #[bench]
     fn bench_transcribe_builtin_large(b: &mut Bencher) {
         let mut d = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
-        d.push("../benchmark-data/rna-large.txt");
+        d.push("../test-data/benchmark-data/rna-large.txt");
         let seq = read_base_string_file(d.to_str().unwrap());
         b.iter(|| transcribe_dna_to_rna_builtin(&seq));
     }
@@ -201,7 +227,7 @@ mod tests {
     #[bench]
     fn bench_find_reverse_palindromes(b: &mut Bencher) {
         let mut d = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
-        d.push("../data/rosalind_revp.txt");
+        d.push("../test-data/rosalind_revp.txt");
         let path = d.to_str().unwrap();
         let seq = fs::read_to_string(path).expect("Error");
         let mut seq = seq.lines();
@@ -214,7 +240,7 @@ mod tests {
     #[bench]
     fn bench_find_reverse_palindromes_large(b: &mut Bencher) {
         let mut d = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
-        d.push("../benchmark-data/revp-large.txt");
+        d.push("../test-data/benchmark-data/revp-large.txt");
         let seq = read_base_string_file(d.to_str().unwrap());
         b.iter(|| find_reverse_palindromes(&seq));
     }
@@ -253,8 +279,25 @@ mod tests {
             [20, 6],
             [21, 4],
         ];
-
-        assert_eq!(true_answer, test_answer)
+        assert_eq!(true_answer, test_answer);
+        let mut d = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
+        d.push("../test-data/rosalind_revp.txt");
+        let path = d.to_str().unwrap();
+        let seq = fs::read_to_string(path).expect("Error");
+        let mut seq = seq.lines();
+        seq.next();
+        let seq: Vec<&str> = seq.collect();
+        let seq = seq.join("");
+        let test_answer = find_reverse_palindromes(&seq);
+        let mut d = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
+        d.push("../test-data/answer_revp.txt");
+        let answer = fs::read_to_string(d.to_str().unwrap()).expect("error!");
+        let test_answer: Vec<String> = test_answer
+            .iter()
+            .map(|p| format!("{} {}\n", p.start_index, p.length))
+            .collect();
+        let test_answer = test_answer.join("");
+        assert_eq!(answer, test_answer);
     }
 }
 

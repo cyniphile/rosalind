@@ -1,49 +1,57 @@
 https://docs.google.com/spreadsheets/d/1-lrlYnfcRzlyVbfqHlM74Bpidv4auIxsR-fQR_o-oKo/edit#gid=0
 
 # TODO:
-pypy?
-Python Rust capitalized
+Python Rust capitalized. RNA DNA built-in,comment all code blocks
+
+- do iters seperately
+- compare with bio python: https://biopython.org/wiki/Seq
+- add rayon NOW just to see how easy it is (can't par replace in python)
+- https://python.land/python-concurrency/python-multiprocessing
+
+
+https://crates.io/crates/multiversion
 
 ---------------
 
-Five Levels of Bioinformatics Programming 
+Five Levels of Bioinformatics Programming: 1 & 2
 =========================================
 
 # Level 1: Python
 
-I've decided I want to make the switch from "data science" (whatever that means amirite?) to bioinformatics. I think a lot of my data skills will transfer over seamlessly to a new domain, but I've also been trying to learn more about biology by going through a list of I found on LinkedIn https://www.linkedin.com/pulse/how-learn-bioinformatics-4catalyzers-eric-jonathan-rothberg/ Rosalind [rosalind.info]. They are basically Euler https://projecteuler.net/archives problems with a biology focus. I started out solving them in Python, the language I know best.
+I've decided I want to make the switch from "data science" (whatever that means amirite?) to bioinformatics. A lot of my data skills will transfer over seamlessly to a new domain, but I've also been trying to learn more about biology by going through a [list of steps I found on LinkedIn](https://www.linkedin.com/pulse/how-learn-bioinformatics-4catalyzers-eric-jonathan-rothberg/) and doing [Rosalind problems](rosalind.info). They are basically [Euler problems](https://projecteuler.net/archives) with a biology focus. I started out solving them in Python, the language I know best.
 
-
-Let's solve the second Rosalind problem: http://rosalind.info/problems/rna/ where we transcribe DNA to RNA. This is a one liner in Python:
+For example, in the second Rosalind [problem](http://rosalind.info/problems/rna/) we transcribe [^3] DNA to RNA. This is a one liner in Python:
 
 ``` python
+# python hand rolled
 def transcribe_dna_to_rna(s: str) -> str:
     return ''.join(["U" if char == 'T' else char for char in s])
 ```
 
 # Level 2: Rust
 
-I realized such problems would be a perfect opportunity to try out Rust to see if I can get some nice speed boosts without too much hassle. That's what Rust is supposed to be about. 
+I realized these would be a perfect opportunity to try out [Rust](https://www.rust-lang.org/) to see if I can get some nice speed boosts without too much hassle. That's what Rust is supposed to be about. 
 
 
-### If you already know about rust, skip this
+### If You Already Know About Rust, Skip This
 
-Rust is a "low-level language with high-level abstractions". It's supposed to be as fast and fine grained as C, but more "erognomic" (less code to write because of the said high level abstractions) and also much safer.
+Rust is a "low-level language with high-level abstractions". It's supposed to be as fast and fine grained as C, but more "erognomic" (less code to write because of the said high level abstractions) and also much safer from bugs.
 
-A key difference is Rust is not garbage collected. Instead the compiler helps you manually manage memory, and as such requires you, the programmer, to write some extra bookeeping annotations about which functions are using which variables ("ownership", "borrowing", and "lifetimes"). I've seen it called "semiautomatic memory management" (as opposed to C/C++ where you have to just know and remember how to manage memory). This is why people often complain about "fighting the compiler" with rust because it's always pointing out inconsistencies in your variable management (in addition to the type errors you get from normal compilers). That said, once something does compile you should have a memory safe, robust, and probably very fast program.
+Rust is not garbage collected. Instead the compiler helps you manually manage memory, and so requires you, the programmer, to write some extra bookeeping annotations about which functions are using which variables ("ownership", "borrowing", and "lifetimes"). I've seen this called "semiautomatic memory management" (as opposed to C/C++ where you have to just know and remember how to manage memory; the compiler doesn't stop you from making mistakes). This is why people often complain about "fighting the compiler" with Rust because it's always pointing out inconsistencies in your variable management (in addition to all the type errors you get from normal compilers). That said, once something does compile you should have a memory safe, robust, and probably very fast program.
 
 There are also other low level aspects of the language, for example there is not one `int` type but _eight_ depending if you want the integer to be signed and how many bits you want to represent it with.
 
-The rust book into is very good resource for learning the language: https://doc.rust-lang.org/book/. I agree the language has a steep learning curve, though I've not really done low-level or systems programming before, so a lot of the effort for me was/is learning _that_. Overall I've found Rust is like bowling with the bumpers: can be maddening to be alwys bouncing back and forth down the lane but eventually I will knock some pins over, vs C++ where i'd immideately be in a gutter of weird memory issues.
+The [Rust book](https://doc.rust-lang.org/book/) is a very good resource for learning the language. It has a steep learning curve, though I've not really done low-level or systems programming before, so a lot of the effort for me was/is learning _that_. Overall I've found Rust is like bowling with the bumpers: can be maddening to be alwys bouncing back and forth down the lane but eventually I will knock some pins over, vs C++ where i'd immideately be in a gutter of weird memory issues.
 
 
-### Rust Implementation
+## Rust Implementation
 
-The Rust implementation is pretty similar to the Python one (especially since we used python type hints), except for the `&` borrow notation and the `.collect()` we have to explicity call on the iterator (more on iterators in another post).  
+The Rust implementation is pretty similar to the Python one (especially since we used Python type hints), except for the `&` borrow notation and the `.collect()` we have to explicity call on the `.chars` iterator (more on iterators in another post).  
 
 ``` rust
+// rust hand rolled
 #[pyfunction]
-pub fn transcribe_dna_to_rna(dna_seq: &str) -> String {
+fn transcribe_dna_to_rna(dna_seq: &str) -> String {
     dna_seq
         .chars()
         .map(|x| if x == 'T' { 'U' } else { x })
@@ -51,69 +59,90 @@ pub fn transcribe_dna_to_rna(dna_seq: &str) -> String {
 }
 ```
 
-Additionally I added the `#[pyfunction]` line which is a decorator-type thing for from the Pyo3 rust package https://github.com/PyO3/pyo3 which makes it really easy to use rust with python.  You more or less just add the prefix and can then call the rust function from python like so:
+Additionally I added the `#[pyfunction]` line which is a decorator-looking thing (actually a Rust macro) from the [Pyo3 Rust package](https://github.com/PyO3/pyo3) which makes it really easy to use Rust with python.  You more or less just add such a prefix and can then call the Rust function from Python like so:
 
 ``` python
+# calling rust functions from python
 import bio_lib_string_rs
 
+dna = "ACTGACTC"
 bio_lib_string_rs.transcribe_dna_to_rna(dna)
 ```
 
- This way we can test out the practicality of using rust incrementally to speed up part of a python project. Since the rust version is nicely callable from python, i can easily wrap them in pytest benchmarks for the following result:
+This way we can test out the practicality of using Rust incrementally to speed up part of a python project. Since the Rust version is nicely callable from python, I can easily wrap them in [pytest benchmarks](https://github.com/cyniphile/rosalind/blob/main/tests/test_benchmark.py). I benchmarked them on a small DNA file of ~1000 bases for the following result:
+![](2021-11-09-17-54-55.png)
 
- ![](2021-11-09-12-51-43.png)
+Woot. The Rust version is nearly 20x faster [^1]. This is including the overhead of transforming the python DNA string input to be usable by Rust. For example if we run a pure Rust profile on the same data (no Python involved) the function runs over 50x faster.
 
- Yay! The Rust version is nearly 20x faster*. This isn't including the overhead of transforming the python dna string input to be usable by rust. For example if we rust a pure rust profile on the same data, read direcly by rust this time, the function runs over 50x faster.
+## More Thorough Performance Comparisons
 
- Now some of you pythonistas might be foaming at the mouth and swearing at your screen right now because the way I implemented `transcribe` wasn't pythonic. I did:
+Now some of you pythonistas might be foaming at the mouth and swearing at your screen right now because the way I implemented `transcribe` wasn't pythonic. I hand-rolled the following function:
 
  ``` python
+# python hand-rolled 
 def transcribe_dna_to_rna(s: str) -> str:
     return ''.join(["U" if char == 'T' else char for char in s])
 ```
 
-when I could have just done:
+when I could have just used the built-in `.replace` function:
 
 ``` python
+# python built-in
 def transcribe_dna_to_rna_builtin(s: str) -> str:
     return s.replace("T", "U")
 ```
 
-Sure, Rust is a lot faster if we compare apples to apples implementations of the same algo, but it's not quite fair in this case because you'd never use that algo. So lets compare the python builtin, and also the rust builtin:
+Sure, Rust is a lot faster if we compare apples to apples implementations of the same algorithm, but it's not quite fair in this case because you'd never actually use that algo. So let's also profile the Python built-in, and also the Rust built-in:
 
 ``` rust
+// rust built-in
 #[pyfunction]
-pub fn transcribe_dna_to_rna_builtin(dna_seq: &str) -> String {
+fn transcribe_dna_to_rna_builtin(dna_seq: &str) -> String {
     dna_seq.replace("T", "U")
 }
 ```
 
-And also see if numpy is any faster:
+And also the Python numpy package:
 
 ``` python
+# numpy 
 import numpy as np
 
 def transcribe_dna_to_rna_np(s: str) -> str:
     return str(np.char.replace(s, "T", "U"))  # type: ignore
 ```
-![](2021-11-09-13-27-40.png)
+I also set up some seperate benchmarks of the Rust functions called directly in Rust, no Python of PyO3 involved. 
+![](2021-11-09-18-22-16.png)
 
-The python builtin `.replace` function is actually the fastest by far, over twice as fast as my Rust function and the rust `.replace` builtin. 
+The python builtin `.replace` function is actually the fastest by far, over twice as fast as my Rust function and the Rust `.replace` builtin. 
 
-This makes sense since python's `.replace` is actually just a highly optimized C function https://github.com/python/cpython/blob/main/Objects/stringlib/replace.h (plus cpython is compiled with gcc, which can emit faster instructions than rust's LLVM https://news.ycombinator.com/item?id=20944403). 
+This sort of makes sense since python's `.replace` is actually just [a highly optimized C function](https://github.com/python/cpython/blob/main/Objects/stringlib/replace.h), though it's still surprising that the Rust `.replace` built-in is so slow [^2]. 
 
-on large data why is pure rust slower than python call?
+The same ranking holds true over different sizes of data, though numpy seems to eventually overcome some fixed initialization overhead. 
+![](2021-11-09-17-27-36.png)
+This chart (and subsequent such charts) were made using a [`perfplot`](https://github.com/nschloe/perfplot) Python script, so the pure rust performance couldn't be included.
+
+## Actually Speeding Something Up
+
+Let try out a more custom task that isn't a Python built-in. This next Rosalind problem is to [identify reverse palindromes](http://rosalind.info/problems/revp/) in a DNA sequence. 
 
 
 
+not implenenting in rust is actually pretty similar to python in this case, only the mandator types in the function defs but the rest are inferred. (Note I wanted to try out pythons 3.10s nice new pattern matching, but I could not install some of my dependencies and it seems still unstable, so I had to go back to 3.9) We use structs in rust and dataclasses in python, because using tuples + comments telling you what the two numbers inside are is obviously worse.
+
+in creating this plot I happened upon a weird GIL error if I used mutable variables or references in conjunction with multithreded python code. Using the function with 
+
+![](output.png)
 
 # Appendix
 
-- Optimized vs unoptimized rust:
-transcribe:
-![](2021-11-09-12-46-33.png)
+[^3]: DNA sequence data are stored as the coding strand (not the template strand), so "transcription" really does mean "replace T with U" not "find the RNA complement strand"
 
+[^1]: It's important to use the super-optimized (and slow compiling) `--release` flag here, otherwise Rust compiles using the default fast-compiling/slow-performing "debug" settings. Check out the performance differeance for `transcribe_dna_to_rna`![](2021-11-09-12-46-33.png)
 
+[^2]: Perhaps this is because cpython is compiled with gcc, [which can sometimes emit faster instructions than Rust's LLVM-based compiler.](https://news.ycombinator.com/item?id=20944403). Or perhaps something else; I didn't look into it too closely.
+
+[^4]: pypy: Just not ready https://scikit-learn.org/stable/faq.html#do-you-support-pypy
 
 - Installing and using pyo3, maturin papercuts using their instructions
 	- needed to add a mysterious config to get it to compile on mac: https://stackoverflow.com/questions/28124221/error-linking-with-cc-failed-exit-code-1
@@ -127,32 +156,10 @@ transcribe:
 
 # 
 - With py03 installed the project become pretty slow to compile ~22s (a known problem with rust).
-- First test rust is about 30% _slower_! Maybe there's just some overhead, so let's make the file really big? Nope still 
-- Try rust only: 
-```
-   Compiling bio-lib-string-rs v0.1.0 (/Users/luke/projects/rosalind/bio-lib-string-rs)
-    Finished bench [optimized] target(s) in 1.40s
-     Running unittests (target/release/deps/bio_lib_string_rs-4a9d6b8de2b2b531)
 
 
-running 1 test
-test tests::bench_trascribe_dna_to_rna ... bench: 716,362,489 ns/iter (+/- 66,738,448)
-
-test tests::bench_convert_native ... bench: 1,024,635,980 ns/iter (+/- 29,729,272)
-
-test result: ok. 0 passed; 0 failed; 0 ignored; 2 measured; 4 filtered out;
-
-```
-Hmm, according to this benchmark, traslating the entire file takes only ~.72 seconds. There must be something slow about translating the data back and forth to Python. Howver benchmarked Rust code is optimized (as you can see from the compiler message), while the imported lib is debug (less highly optimized).
-
-This is a lesson: only optimize operations more complex per unit data than the translation process of moving the data back and forth between python and rust. In this case, it's not worth it: the incremental overhead of moving the data to rust and back is less than the incremental saving of doing the processing in rust. 
-
-To test this out, lets make the operation we want to do more complex. Still o(n) but with a bigger constant. We'll now do this rosalind problem. Something >o(n) would be interesting, but I'm interested in constant time opererations as well, because one of the slower things in python is doing a custom .apply to a series of data (which is usually some constant time operation given a fixed window of data) and maybe rust would be useful for writing a fast drop in?
-
-not implenenting in rust is actually pretty similar to python in this case, only the mandator types in the function defs but the rest are inferred. (Note I wanted to try out pythons 3.10s nice new pattern matching, but I could not install some of my dependencies and it seems still unstable, so I had to go back to 3.9) We use structs in rust and dataclasses in python, because using tuples + comments telling you what the two numbers inside are is obviously worse.
 
 
-https://developers.redhat.com/blog/2017/11/16/speed-python-using-rust#python_with_itertools
 
 
 
@@ -177,5 +184,3 @@ https://developers.redhat.com/blog/2017/11/16/speed-python-using-rust#python_wit
 # rust par_iter
 https://medium.com/@mjschillawski/quick-and-easy-parallelization-in-python-32cb9027e490
 
-
-https://crates.io/crates/multiversion
