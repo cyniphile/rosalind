@@ -162,6 +162,10 @@ pub fn is_reverse_palindrome(seq: &str) -> bool {
     seq == reverse_complement_dna(seq)
 }
 
+pub fn reverse_complement_dna(dna_seq: &str) -> String {
+    dna_seq.chars().rev().map(dna_base_complement).collect()
+}
+
 #[pyfunction]
 pub fn transcribe_dna_to_rna(dna_seq: &str) -> String {
     dna_seq
@@ -175,9 +179,7 @@ pub fn transcribe_dna_to_rna_builtin(dna_seq: &str) -> String {
     dna_seq.replace("T", "U")
 }
 
-pub fn reverse_complement_dna(dna_seq: &str) -> String {
-    dna_seq.chars().rev().map(dna_base_complement).collect()
-}
+
 
 #[cfg(test)]
 mod tests {
