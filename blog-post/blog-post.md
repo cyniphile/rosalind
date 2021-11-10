@@ -44,7 +44,7 @@ fn transcribe_dna_to_rna(dna_seq: &str) -> String {
 }
 ```
 
-Additionally, I added the decorator-looking `#[pyfunction]` thing (actually a Rust macro) from the [Pyo3 Rust package](https://github.com/PyO3/pyo3) which makes it really easy to use Rust with Python[^7].  You (more or less) just add such a prefix and then call the Rust function from Python like so:
+Additionally, I added the decorator-looking `#[pyfunction]` thing (actually a Rust macro) from the [PyO3 Rust package](https://github.com/PyO3/pyo3) which makes it really easy to use Rust with Python[^7].  You (more or less) just add such a prefix and then call the Rust function from Python like so:
 
 ``` python
 # calling rust functions from python
@@ -99,13 +99,13 @@ def transcribe_dna_to_rna_np(s: str) -> str:
 I also set up some separate benchmarks of the Rust functions called directly in Rust, no Python of PyO3 involved. 
 ![](2021-11-09-18-22-16.png)
 
-The python builtin `.replace` function is actually the fastest by far, over twice as fast as my Rust function and the Rust `.replace` builtin. 
+The python built-in `.replace` function is actually the fastest by far, over twice as fast as my Rust function and the Rust `.replace` built-in. 
 
 This sort of makes sense since Python's `.replace` is actually just [a highly optimized C function](https://github.com/python/cpython/blob/main/Objects/stringlib/replace.h), though it's still surprising that the Rust `.replace` built-in is so slow [^2]. 
 
 The same ranking holds true over different sizes of data, though numpy seems to eventually overcome some fixed initialization overhead. 
 ![](2021-11-09-17-27-36.png)
-This chart (and subsequent such charts) were made using a [`perfplot`](https://github.com/nschloe/perfplot) Python script, so the pure rust performance couldn't be included.
+This chart (and subsequent such charts) were made using a [`perfplot`](https://github.com/nschloe/perfplot) Python script, so the pure Rust performance couldn't be included.
 
 ## Actually Speeding Something Up
 
@@ -242,7 +242,7 @@ Rust is about 15x faster than base Python, even with all the conversion overhead
 
 [^1]: It's important to use the super-optimized (and slow compiling) `--release` flag here, otherwise Rust compiles using the default fast-compiling/slow-performing "debug" settings. Check out the performance difference for `transcribe_dna_to_rna`![](2021-11-09-12-46-33.png)
 
-[^2]: Perhaps this is because cpython is compiled with gcc, [which can sometimes emit faster instructions than Rust's LLVM-based compiler](https://news.ycombinator.com/item?id=20944403). Or perhaps something else; I didn't look into it too closely.
+[^2]: Perhaps this is because CPython is compiled with gcc, [which can sometimes emit faster instructions than Rust's LLVM-based compiler](https://news.ycombinator.com/item?id=20944403). Or perhaps something else; I didn't look into it too closely.
 
 [^6]: Yes, I know, this is not the best algorithm. That's not the point. The point is to compare the same algo in Rust and Python. Side note: I wanted to try out Python 3.10's new [pattern matching](https://www.python.org/dev/peps/pep-0636/), but I could not install some of my dependencies (SciPy) and it still seems unstable, so I had to go back to 3.9.
 
