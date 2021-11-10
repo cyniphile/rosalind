@@ -26,7 +26,7 @@ Rust is not garbage collected. Instead, the compiler helps you manually manage m
 
 There are also other low-level aspects of the language; for example, there is not one `int` type but _eight_ depending if you want the integer to be signed and how many bits you want to represent it with.
 
-The [Rust book](https://doc.rust-lang.org/book/) is a very good resource for learning the language. It has a steep learning curve, but I've also not really done low-level programming before, so a lot of the effort for me was learning _that_. Overall I've found Rust is like bowling with the bumpers: it can be maddening to be always bouncing back and forth down the lane but eventually I will knock some pins over, vs C++ where I'd immediately be in a gutter of weird silent errors.
+The [Rust book](https://doc.rust-lang.org/book/) is a very good resource for learning the language. It has a steep learning curve, but I've also not really done low-level programming before, so a lot of the effort for me was learning _that_. Overall I've found Rust is like bowling with the bumpers: it can be maddening to be always bouncing back and forth down the lane, but eventually I will knock some pins over, vs C++ where I'd immediately be in a gutter of weird silent errors.
 
 
 ## Rust Implementation
@@ -44,7 +44,7 @@ fn transcribe_dna_to_rna(dna_seq: &str) -> String {
 }
 ```
 
-Additionally, I added the decorator-looking `#[pyfunction]` thing (actually a Rust macro) from the [Pyo3 Rust package](https://github.com/PyO3/pyo3) which makes it really easy to use Rust with Python[^7].  You (more or less) just add such a prefix and then you call the Rust function from Python like so:
+Additionally, I added the decorator-looking `#[pyfunction]` thing (actually a Rust macro) from the [Pyo3 Rust package](https://github.com/PyO3/pyo3) which makes it really easy to use Rust with Python[^7].  You (more or less) just add such a prefix and then call the Rust function from Python like so:
 
 ``` python
 # calling rust functions from python
@@ -229,7 +229,7 @@ How do things pan out this time?
 
 ![](output.png)
 
-Rust is about 15x faster than base Python, even with all the conversion overhead! Was it worth the effort? I'd say "yes!". Writing these relatively simple Rust functions is frankly pretty easy (Rust definitely gets harder! But that's for a later post). And the PyO3 crate makes it pretty straightforward to incrementally add the extra "Rust thrust" (new viral hashtag?) when you need it. This wasn't without papercuts or headscratchers (as detailed below in the notes), but if this was for heavily reused code (perhaps part of some data pipeline), I think it's well worth the price. 
+Rust is about 15x faster than base Python, even with all the conversion overhead! Was it worth the effort? I'd say "yes!". Writing these relatively simple Rust functions is frankly pretty easy (Rust definitely gets harder! But that's for a later post). And the PyO3 crate makes it pretty straightforward to incrementally add the extra "Rust thrust" (new viral hashtag?) when you need it. This wasn't without papercuts or headscratchers (as detailed below in the notes), but if this was for heavily reused code (perhaps part of some data pipeline), I think it's well worth the price.[^4] 
 
 # Notes 
 
@@ -238,15 +238,15 @@ Rust is about 15x faster than base Python, even with all the conversion overhead
 [^7]: Installing and using PyO3 had some papercuts: 
 	- I needed to add [a mysterious config](https://stackoverflow.com/questions/28124221/error-linking-with-cc-failed-exit-code-1) to get it to compile on Mac: 
 	- The VSCode [rust-analyzer](https://marketplace.visualstudio.com/items?itemName=matklad.rust-analyzer) has a bug where it [shows](https://github.com/rust-analyzer/rust-analyzer/issues/6716) fake [errors](https://stackoverflow.com/questions/65223576/what-does-the-rust-analyzer-error-could-not-resolve-macro-crateformat-args) in PyO3 macros.  
-	-  With PyO3 installed, my project began to show some of Rust's imfamous slow compile times (it went from a couple seconds ~22s).
+	-  With PyO3 installed, my project began to show some of Rust's infamous slow compile times (it went from a couple of seconds ~22s).
 
-[^1]: It's important to use the super-optimized (and slow compiling) `--release` flag here, otherwise Rust compiles using the default fast-compiling/slow-performing "debug" settings. Check out the performance differeance for `transcribe_dna_to_rna`![](2021-11-09-12-46-33.png)
+[^1]: It's important to use the super-optimized (and slow compiling) `--release` flag here, otherwise Rust compiles using the default fast-compiling/slow-performing "debug" settings. Check out the performance difference for `transcribe_dna_to_rna`![](2021-11-09-12-46-33.png)
 
-[^2]: Perhaps this is because cpython is compiled with gcc, [which can sometimes emit faster instructions than Rust's LLVM-based compiler.](https://news.ycombinator.com/item?id=20944403). Or perhaps something else; I didn't look into it too closely.
+[^2]: Perhaps this is because cpython is compiled with gcc, [which can sometimes emit faster instructions than Rust's LLVM-based compiler](https://news.ycombinator.com/item?id=20944403). Or perhaps something else; I didn't look into it too closely.
 
 [^6]: Yes, I know, this is not the best algorithm. That's not the point. The point is to compare the same algo in Rust and Python. Side note: I wanted to try out Python 3.10's new [pattern matching](https://www.python.org/dev/peps/pep-0636/), but I could not install some of my dependencies (SciPy) and it still seems unstable, so I had to go back to 3.9.
 
-[^5]: This was the first time I ran into not so nice problems with PyO3. I started with a Rust implementation [nearly identical to the Python one](https://github.com/cyniphile/rosalind/blob/04885c9644e1cff2287a43dce94763e80f482c39/bio-lib-string-rs/src/lib.rs#L139) but I ran into a weird GIL deadlock when profiling with `perfplot` (which apparently does some multithreaded stuff). I manged to resolve this by not having any `mut` or borrowed variables in the function body, but this was a quick hack fix. I have not yet gone deep on the [GIL and mutability](https://pyo3.rs/v0.15.0/types.html?highlight=gil#gil-lifetimes-mutability-and-python-object-types) w.r.t. PyO3.
+[^5]: This was the first time I ran into not-so-nice problems with PyO3. I started with a Rust implementation [nearly identical to the Python one](https://github.com/cyniphile/rosalind/blob/04885c9644e1cff2287a43dce94763e80f482c39/bio-lib-string-rs/src/lib.rs#L139) but I ran into a weird GIL deadlock when profiling with `perfplot` (which apparently does some multithreaded stuff). I managed to resolve this by not having any `mut` or borrowed variables in the function body, but this was a quick hack fix. I have not yet gone deep on the [GIL and mutability](https://pyo3.rs/v0.15.0/types.html?highlight=gil#gil-lifetimes-mutability-and-python-object-types) w.r.t. PyO3.
 
 [^4]: What about pypy? Didn't try it because it still just don't seem ready https://scikit-learn.org/stable/faq.html#do-you-support-pypy
 
