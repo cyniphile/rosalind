@@ -89,6 +89,7 @@ fn transcribe_dna_to_rna_builtin(dna_seq: &str) -> String {
 
 And also the Python numpy package built-in:
 
+
 ``` python
 # numpy 
 import numpy as np
@@ -109,7 +110,7 @@ This chart (and subsequent such charts) were made using a [`perfplot`](https://g
 
 ## Actually Speeding Something Up
 
-Let's try out a more custom task that isn't a Python built-in. This next Rosalind problem is to [identify reverse palindromes](http://rosalind.info/problems/revp/) in a DNA sequence.[^6] 
+Let's try out a more custom task that isn't already a Python built-in. This next Rosalind problem is to [identify reverse palindromes](http://rosalind.info/problems/revp/) in a DNA sequence.[^6] 
 
 ``` python
 @dataclass
