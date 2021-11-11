@@ -34,44 +34,44 @@ def test_transcribe(example_dna):
     assert(d == e)
 
 
-# def test_py_transcribe(benchmark, example_dna):
-#     benchmark(transcribe_dna_to_rna, example_dna)
+def test_py_transcribe(benchmark, example_dna):
+    benchmark(transcribe_dna_to_rna, example_dna)
 
 
-# def test_rs_transcribe(benchmark, example_dna):
-#     benchmark(bio_lib_string_rs.transcribe_dna_to_rna, example_dna)
+def test_rs_transcribe(benchmark, example_dna):
+    benchmark(bio_lib_string_rs.transcribe_dna_to_rna, example_dna)
 
 
-# def test_transcribe_np(benchmark, example_dna):
-#     benchmark(transcribe_dna_to_rna_np, example_dna)
+def test_transcribe_np(benchmark, example_dna):
+    benchmark(transcribe_dna_to_rna_np, example_dna)
 
 
-# def test_rs_transcribe_builtin(benchmark, example_dna):
-#     benchmark(bio_lib_string_rs.transcribe_dna_to_rna_builtin, example_dna)
+def test_rs_transcribe_builtin(benchmark, example_dna):
+    benchmark(bio_lib_string_rs.transcribe_dna_to_rna_builtin, example_dna)
 
 
-# def test_transcribe_builtin(benchmark, example_dna):
-#     benchmark(transcribe_dna_to_rna_builtin, example_dna)
+def test_transcribe_builtin(benchmark, example_dna):
+    benchmark(transcribe_dna_to_rna_builtin, example_dna)
 
 
-# def test_transcribe_large(benchmark, example_dna_large):
-#     benchmark(transcribe_dna_to_rna, example_dna_large)
+def test_transcribe_large(benchmark, example_dna_large):
+    benchmark(transcribe_dna_to_rna, example_dna_large)
 
 
-# def test_transcribe_np_large(benchmark, example_dna_large):
-#     benchmark(transcribe_dna_to_rna_np, example_dna_large)
+def test_transcribe_np_large(benchmark, example_dna_large):
+    benchmark(transcribe_dna_to_rna_np, example_dna_large)
 
 
-# def test_rs_transcribe_large(benchmark, example_dna_large):
-#     benchmark(bio_lib_string_rs.transcribe_dna_to_rna, example_dna_large)
+def test_rs_transcribe_large(benchmark, example_dna_large):
+    benchmark(bio_lib_string_rs.transcribe_dna_to_rna, example_dna_large)
 
 
-# def test_rs_transcribe_builtin_large(benchmark, example_dna_large):
-#     benchmark(bio_lib_string_rs.transcribe_dna_to_rna_builtin, example_dna_large)
+def test_rs_transcribe_builtin_large(benchmark, example_dna_large):
+    benchmark(bio_lib_string_rs.transcribe_dna_to_rna_builtin, example_dna_large)
 
 
-# def test_transcribe_builtin_large(benchmark, example_dna_large):
-#     benchmark(transcribe_dna_to_rna_builtin, example_dna_large)
+def test_transcribe_builtin_large(benchmark, example_dna_large):
+    benchmark(transcribe_dna_to_rna_builtin, example_dna_large)
 
 def test_palindromes(example_dna):
     a = find_reverse_palindromes_np(example_dna)
