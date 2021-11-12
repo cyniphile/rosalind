@@ -17,45 +17,6 @@ pub enum RnaNucleotide {
     U,
 }
 
-
-
-
-
-
-
-
-
-
-
-
-fn complement(base: DnaNucleotide) -> DnaNucleotide {
-    match base {
-        DnaNucleotide::A => DnaNucleotide::T,
-        DnaNucleotide::T => DnaNucleotide::A,
-        DnaNucleotide::C => DnaNucleotide::G,
-        DnaNucleotide::G => DnaNucleotide::C,
-    }
-}
-
-fn x() {
-
-
-
-
-
-
-
-
-
-
-
-
- complement(DnaNucleotide::A);
-
-
-
-}
-
 #[derive(PartialEq, Eq, Hash)]
 pub enum AminoAcid {
     A,

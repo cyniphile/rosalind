@@ -63,7 +63,7 @@ This is even more useful when converting from codons to amino acids. If we forge
 
 ![](2021-11-12-09-49-10.png)
 
-Notce here I've made use of both `RnaNucleotide` and `AminoAcid` enums I've defined elsewhere in the cod
+Notce here I've made use of both `RnaNucleotide` and `AminoAcid` enums I've defined elsewhere in the code   
 
 - https://www.youtube.com/watch?v=FnBPECrSC7o&ab_channel=JaneStreet
 - enum are a bit tricky because they aren't types
