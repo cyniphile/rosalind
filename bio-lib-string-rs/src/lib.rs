@@ -20,6 +20,8 @@ pub fn dna_base_complement(base: char) -> char {
     }
 }
 
+
+
 fn translate_codon_to_amino_acid(codon: &[u8]) -> char {
     match codon {
         b"UUU" => 'F',
@@ -178,8 +180,6 @@ pub fn transcribe_dna_to_rna(dna_seq: &str) -> String {
 pub fn transcribe_dna_to_rna_builtin(dna_seq: &str) -> String {
     dna_seq.replace("T", "U")
 }
-
-
 
 #[cfg(test)]
 mod tests {

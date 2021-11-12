@@ -1,7 +1,3 @@
-#![feature(type_alias_impl_trait)]
-#![feature(generic_associated_types)]
-
-// TODO: set up profiling and parallelize with Rayon
 use std::{collections::HashMap, fs};
 
 #[derive(PartialEq, Eq, Hash)]
@@ -19,6 +15,45 @@ pub enum RnaNucleotide {
     C,
     G,
     U,
+}
+
+
+
+
+
+
+
+
+
+
+
+
+fn complement(base: DnaNucleotide) -> DnaNucleotide {
+    match base {
+        DnaNucleotide::A => DnaNucleotide::T,
+        DnaNucleotide::T => DnaNucleotide::A,
+        DnaNucleotide::C => DnaNucleotide::G,
+        DnaNucleotide::G => DnaNucleotide::C,
+    }
+}
+
+fn x() {
+
+
+
+
+
+
+
+
+
+
+
+
+ complement(DnaNucleotide::A);
+
+
+
 }
 
 #[derive(PartialEq, Eq, Hash)]
@@ -46,13 +81,9 @@ pub enum AminoAcid {
     Stop,
 }
 
-pub type DnaIter<'a> = impl Iterator<Item = DnaNucleotide> + 'a + DoubleEndedIterator;
-pub type RnaIter<'a> = impl Iterator<Item = RnaNucleotide> + 'a + DoubleEndedIterator;
-pub type ProteinIter<'a> = impl Iterator<Item = AminoAcid> + 'a;
-
+pub type DNA = Vec<DnaNucleotide>;
+pub type RNA = Vec<RnaNucleotide>;
 pub type Protein = Vec<AminoAcid>;
-pub type Dna = Vec<DnaNucleotide>;
-pub type Rna = Vec<RnaNucleotide>;
 
 pub trait Nucleotide {
     fn complement(&self) -> Self;
@@ -82,81 +113,63 @@ impl Nucleotide for RnaNucleotide {
 }
 
 pub trait StringParsable {
-    type Item;
-    type Iter<'a>;
-    // TODO: should be way to have default implementations of parse/to _string
-    // So far causing type problems
-    fn parse_string(seq: &str) -> Self::Iter<'_>;
-    fn parse_char(c: &char) -> Self::Item;
+    fn parse_string(seq: &String) -> Self;
     fn to_string(&self) -> String;
-    fn to_char(c: &Self::Item) -> char;
 }
 
-impl StringParsable for Dna {
-    type Item = DnaNucleotide;
-    type Iter<'a> = DnaIter<'a>;
-    fn parse_char(c: &char) -> Self::Item {
-        match c {
+impl StringParsable for DNA {
+    fn parse_string(seq: &String) -> DNA {
+        let parser = |base| match base {
             // TODO: make these bijective maps
             'A' => DnaNucleotide::A,
             'C' => DnaNucleotide::C,
             'G' => DnaNucleotide::G,
             'T' => DnaNucleotide::T,
-            _ => panic!("\"{}\" is not a recognized DNA base.", c),
-        }
+            _ => panic!("\"{}\" is not a recognized DNA base.", base),
+        };
+        seq.chars().map(parser).collect()
     }
-    fn parse_string(seq: &str) -> DnaIter {
-        seq.chars().map(|c| Self::parse_char(&c))
-    }
-    fn to_char(c: &DnaNucleotide) -> char {
-        match c {
-            DnaNucleotide::A => 'A',
-            DnaNucleotide::C => 'C',
-            DnaNucleotide::G => 'G',
-            DnaNucleotide::T => 'T',
-        }
-    }
-    // TODO: also make iterator
     fn to_string(&self) -> String {
-        self.iter().map(Self::to_char).collect()
+        fn parser(base: &DnaNucleotide) -> char {
+            match base {
+                DnaNucleotide::A => 'A',
+                DnaNucleotide::C => 'C',
+                DnaNucleotide::G => 'G',
+                DnaNucleotide::T => 'T',
+            }
+        }
+        self.iter().map(parser).collect()
     }
 }
 
-impl StringParsable for Rna {
-    type Item = RnaNucleotide;
-    type Iter<'a> = RnaIter<'a>;
-    fn parse_char(c: &char) -> Self::Item {
-        match c {
+impl StringParsable for RNA {
+    fn parse_string(seq: &String) -> RNA {
+        let parser = |base| match base {
             // TODO: make these bijective maps
             'A' => RnaNucleotide::A,
             'C' => RnaNucleotide::C,
             'G' => RnaNucleotide::G,
             'U' => RnaNucleotide::U,
-            _ => panic!("\"{}\" is not a recognized RNA base.", c),
-        }
+            _ => panic!("\"{}\" is not a recognized RNA base.", base),
+        };
+        seq.chars().map(parser).collect()
     }
-    fn parse_string(seq: &str) -> RnaIter {
-        seq.chars().map(|c| Self::parse_char(&c))
-    }
-    fn to_char(c: &Self::Item) -> char {
-        match c {
-            RnaNucleotide::A => 'A',
-            RnaNucleotide::C => 'C',
-            RnaNucleotide::G => 'G',
-            RnaNucleotide::U => 'U',
-        }
-    }
-
     fn to_string(&self) -> String {
-        self.iter().map(Self::to_char).collect()
+        fn parser(base: &RnaNucleotide) -> char {
+            match base {
+                RnaNucleotide::A => 'A',
+                RnaNucleotide::C => 'C',
+                RnaNucleotide::G => 'G',
+                RnaNucleotide::U => 'U',
+            }
+        }
+        self.iter().map(parser).collect()
     }
 }
 
 impl StringParsable for Protein {
-    type Item = AminoAcid;
-    type Iter<'a> = ProteinIter<'a>;
-    fn parse_char(c: &char) -> Self::Item {
-        match c {
+    fn parse_string(seq: &String) -> Self {
+        let parser = |aa| match aa {
             // TODO: make these bijective maps
             'A' => AminoAcid::A,
             'R' => AminoAcid::R,
@@ -179,82 +192,85 @@ impl StringParsable for Protein {
             'Y' => AminoAcid::Y,
             'V' => AminoAcid::V,
             '|' => AminoAcid::Stop,
-            _ => panic!("\"{}\" is not a recognized Amino Acid symbol.", c),
-        }
-    }
-    fn parse_string(seq: &str) -> ProteinIter {
-        seq.chars().map(|c| Self::parse_char(&c))
-    }
-    fn to_char(aa: &Self::Item) -> char {
-        match aa {
-            AminoAcid::Stop => '|',
-            AminoAcid::V => 'V',
-            AminoAcid::Y => 'Y',
-            AminoAcid::W => 'W',
-            AminoAcid::T => 'T',
-            AminoAcid::S => 'S',
-            AminoAcid::P => 'P',
-            AminoAcid::F => 'F',
-            AminoAcid::M => 'M',
-            AminoAcid::K => 'K',
-            AminoAcid::L => 'L',
-            AminoAcid::I => 'I',
-            AminoAcid::H => 'H',
-            AminoAcid::G => 'G',
-            AminoAcid::E => 'E',
-            AminoAcid::Q => 'Q',
-            AminoAcid::C => 'C',
-            AminoAcid::D => 'D',
-            AminoAcid::N => 'N',
-            AminoAcid::R => 'R',
-            AminoAcid::A => 'A',
-        }
+            _ => panic!("\"{}\" is not a recognized Amino Acid.", aa),
+        };
+        seq.chars().map(parser).collect()
     }
     fn to_string(&self) -> String {
-        self.iter().map(Self::to_char).collect()
+        fn parser(aa: &AminoAcid) -> char {
+            match aa {
+                AminoAcid::Stop => '|',
+                AminoAcid::V => 'V',
+                AminoAcid::Y => 'Y',
+                AminoAcid::W => 'W',
+                AminoAcid::T => 'T',
+                AminoAcid::S => 'S',
+                AminoAcid::P => 'P',
+                AminoAcid::F => 'F',
+                AminoAcid::M => 'M',
+                AminoAcid::K => 'K',
+                AminoAcid::L => 'L',
+                AminoAcid::I => 'I',
+                AminoAcid::H => 'H',
+                AminoAcid::G => 'G',
+                AminoAcid::E => 'E',
+                AminoAcid::Q => 'Q',
+                AminoAcid::C => 'C',
+                AminoAcid::D => 'D',
+                AminoAcid::N => 'N',
+                AminoAcid::R => 'R',
+                AminoAcid::A => 'A',
+            }
+        }
+        self.iter().map(parser).collect()
     }
 }
 
-fn transcribe_base(base: &DnaNucleotide) -> RnaNucleotide {
-    match base {
-        DnaNucleotide::A => RnaNucleotide::A,
-        DnaNucleotide::C => RnaNucleotide::C,
-        DnaNucleotide::G => RnaNucleotide::G,
-        DnaNucleotide::T => RnaNucleotide::U,
-    }
-}
-
-// Can't make return type RnaIter because type alias locks to a concrete type
-// and so can't be used with different closures.
-// https://stackoverflow.com/questions/57937436/how-to-alias-an-impl-trait
-pub fn transcribe
-_dna_to_rna<'a>(seq: DnaIter<'a>) -> impl Iterator<Item = RnaNucleotide> + 'a
-where
-    DnaIter<'a>: 'a,
-{
-    seq.map(|b| convert_base(&b))
+pub fn read_and_parse_string_file<T: StringParsable>(path: &str) -> T {
+    let file = fs::read_to_string(path).expect("Can't parse file to into a string.");
+    let seq = file.to_uppercase().trim().to_string();
+    T::parse_string(&seq)
 }
 
 pub fn read_string_file(path: &str) -> String {
-    let file = fs::read_to_string(path).expect("File not found.");
+    let file = fs::read_to_string(path).expect("fuck");
     file.to_uppercase().trim().to_string()
 }
 
-/*TODO: using a named tuple struct added some complexity to the ownership stucture.
-  For now just using simple 3-ples
-*/
+//   TODO: using a named tuple struct added some complexity to the ownership stucture.
+//   For now just using simple 3-ples
 // struct Codon(RnaNucleotide, RnaNucleotide, RnaNucleotide);
 
-//   TODO: Handle unequal length
-pub fn hamming_distance<I, U: PartialEq>(seq1: I, seq2: I) -> i32
-where
-    I: Iterator<Item = U>,
-{
-    seq1.zip(seq2)
+//   TODO: do some profiling to compare with 'functional' implementation
+//   https://crates.io/crates/criterion
+pub fn hamming_distance<U: PartialEq>(seq1: &Vec<U>, seq2: &Vec<U>) -> i32 {
+    assert_eq!(
+        seq1.len(),
+        seq2.len(),
+        "This implementation of Hamming distance only works for strings of equal size."
+    );
+    let mut dist = 0;
+    for (x, y) in seq1.iter().zip(seq2) {
+        if x != y {
+            dist += 1;
+        }
+    }
+    dist
+}
+
+pub fn hamming_distance_functional<U: PartialEq>(seq1: &Vec<U>, seq2: &Vec<U>) -> i32 {
+    assert_eq!(
+        seq1.len(),
+        seq2.len(),
+        "This implementation of Hamming distance only works 
+        for strings of equal size."
+    );
+    seq1.iter()
+        .zip(seq2)
         .fold(0, |acc, (x, y)| if x != y { acc + 1 } else { acc })
 }
 
-pub fn translate_codon(codon: (&RnaNucleotide, &RnaNucleotide, &RnaNucleotide)) -> AminoAcid {
+fn translate_codon(codon: (&RnaNucleotide, &RnaNucleotide, &RnaNucleotide)) -> AminoAcid {
     use RnaNucleotide::*;
     match codon {
         (U, U, U) => AminoAcid::F,
@@ -269,9 +285,9 @@ pub fn translate_codon(codon: (&RnaNucleotide, &RnaNucleotide, &RnaNucleotide)) 
         (U, A, C) => AminoAcid::Y,
         (U, A, A) => AminoAcid::Stop,
         (U, A, G) => AminoAcid::Stop,
-        (U, G, A) => AminoAcid::Stop,
         (U, G, U) => AminoAcid::C,
         (U, G, C) => AminoAcid::C,
+        (U, G, A) => AminoAcid::Stop,
         (U, G, G) => AminoAcid::W,
         (C, U, U) => AminoAcid::L,
         (A, U, U) => AminoAcid::I,
@@ -324,114 +340,90 @@ pub fn translate_codon(codon: (&RnaNucleotide, &RnaNucleotide, &RnaNucleotide)) 
     }
 }
 
-pub struct Translator<I: Iterator<Item = RnaNucleotide>> {
-    inner: I,
+pub fn translate(rna: &RNA) -> Protein {
+    rna.chunks(3)
+        .map(|chunk| (&chunk[0], &chunk[1], &chunk[2]))
+        .map(translate_codon)
+        .collect()
 }
 
-impl<I: Iterator<Item = RnaNucleotide>> Iterator for Translator<I> {
-    type Item = AminoAcid;
-    fn next(&mut self) -> Option<AminoAcid> {
-        let s1 = match self.inner.next() {
-            Some(s) => s,
-            None => return None,
-        };
-        let err_msg = "Cannot translate: sequence is not divisible by 3";
-        let s2 = self.inner.next().expect(err_msg);
-        let s3 = self.inner.next().expect(err_msg);
-        Some(translate_codon((&s1, &s2, &s3)))
+pub fn transcribe(seq: &DNA) -> RNA {
+    let transcribe = |base: &DnaNucleotide| match base {
+        DnaNucleotide::A => RnaNucleotide::A,
+        DnaNucleotide::C => RnaNucleotide::C,
+        DnaNucleotide::G => RnaNucleotide::G,
+        DnaNucleotide::T => RnaNucleotide::U,
+    };
+    seq.iter().map(transcribe).collect()
+}
+
+pub fn reverse_complement<T: Nucleotide>(seq: &Vec<T>) -> Vec<T> {
+    seq.iter().rev().map(|base| base.complement()).collect()
+}
+
+pub fn base_counts<T: Eq + std::hash::Hash>(seq: &Vec<T>) -> HashMap<&T, u32> {
+    let mut counts = HashMap::new();
+    for item in seq {
+        *counts.entry(item).or_insert(0) += 1 as u32;
     }
-}
-
-pub trait TranscribeIteratorExt: Iterator<Item = RnaNucleotide> + Sized {
-    fn translate(self) -> Translator<Self>;
-}
-
-impl<I: Iterator<Item = RnaNucleotide>> TranscribeIteratorExt for I {
-    fn translate(self) -> Translator<Self> {
-        Translator { inner: self }
-    }
-}
-
-pub fn reverse_complement<T: Nucleotide>(
-    seq: impl Iterator<Item = T> + std::iter::DoubleEndedIterator,
-) -> impl Iterator<Item = T> {
-    seq.rev().map(|base| base.complement())
-}
-
-pub fn base_counts<T>(seq: impl Iterator<Item = T>) -> HashMap<T, u32>
-where
-    T: Eq + std::hash::Hash,
-{
-    let counts = HashMap::new();
-    seq.fold(counts, |mut acc, item| {
-        *acc.entry(item).or_insert(0) += 1;
-        acc
-    })
+    counts
 }
 
 #[cfg(test)]
 mod tests {
-    use super::*;
-
-    #[test]
-    fn test_transcribe() {
-        let string = "GATGGAACTTGACTACGTAAATT";
-        let seq = Dna::parse_string(string);
-        let answer: Rna = transcribe_dna_to_rna(seq).collect();
-        let answer = answer.to_string();
-        assert_eq!(answer, "GAUGGAACUUGACUACGUAAAUU");
-        let seq = Dna::parse_string(string);
-        let answer = transcribe_dna_to_rna(seq).translate();
-        let _: Protein = answer.collect();
-    }
+    // TODO: organize above code into a module to avoid the many imports here
+    use crate::base_counts;
+    use crate::hamming_distance;
+    use crate::hamming_distance_functional;
+    use crate::reverse_complement;
+    use crate::transcribe;
+    use crate::translate;
+    use crate::DnaNucleotide;
+    use crate::StringParsable;
+    use crate::DNA;
+    use crate::RNA;
 
     #[test]
     fn test_translate() {
-        let string = "AUGGCCAUGGCGCCCAGAACUGAGAUCAAUAGUACCCGUAUUAACGGGUGA".to_string();
-        let test_rna: RnaIter = Rna::parse_string(&string);
-        let answer: Protein = test_rna.translate().collect();
-        let answer = answer.to_string();
-        assert_eq!(answer, "MAMAPRTEINSTRING|");
+        let test_rna =
+            RNA::parse_string(&"AUGGCCAUGGCGCCCAGAACUGAGAUCAAUAGUACCCGUAUUAACGGGUGA".to_string());
+        let answer = translate(&test_rna).to_string();
+        assert_eq!(answer, "MAMAPRTEINSTRING|")
     }
 
     #[test]
-    #[should_panic(expected = "Cannot translate: sequence is not divisible by 3")]
-    fn test_non_mod_3_rna_translate() {
-        let string = "AUGGCCAUGGCGCCCAGAACUGAGAUCAAUAGUACCCGUAUUAACGGGUG".to_string();
-        let test_rna = Rna::parse_string(&string);
-        let _protein_iter: Protein = test_rna.translate().collect();
+    fn test_trascribe() {
+        let seq = DNA::parse_string(&"GATGGAACTTGACTACGTAAATT".to_string());
+        let answer = transcribe(&seq).to_string();
+        assert_eq!(answer, "GAUGGAACUUGACUACGUAAAUU");
     }
 
     #[test]
     fn test_reverse_complement() {
-        let string = "AAAACCCGGT".to_string();
-        let seq = Dna::parse_string(&string);
-        let answer: Dna = reverse_complement(seq).collect();
-        let answer = answer.to_string();
+        let seq = DNA::parse_string(&"AAAACCCGGT".to_string());
+        let answer = reverse_complement(&seq).to_string();
         assert_eq!(answer, "ACCGGGTTTT");
-        let string = "AAAACCCGGU".to_string();
-        let seq = Rna::parse_string(&string);
-        let answer: Rna = reverse_complement(seq).collect();
-        let answer = answer.to_string();
+        let seq = RNA::parse_string(&"AAAACCCGGU".to_string());
+        let answer = reverse_complement(&seq).to_string();
         assert_eq!(answer, "ACCGGGUUUU");
     }
 
     #[test]
     fn test_hamming_distance() {
-        let string1 = "GAGCCTACTAACGGGAT".to_string();
-        let string2 = "CATCGTAATGACGGCCT".to_string();
-        let seq1 = Dna::parse_string(&string1);
-        let seq2 = Dna::parse_string(&string2);
-        let answer = hamming_distance(seq1, seq2);
+        let seq1 = DNA::parse_string(&"GAGCCTACTAACGGGAT".to_string());
+        let seq2 = DNA::parse_string(&"CATCGTAATGACGGCCT".to_string());
+        let answer = hamming_distance(&seq1, &seq2);
+        assert_eq!(answer, 7);
+        let answer = hamming_distance_functional(&seq1, &seq2);
         assert_eq!(answer, 7);
     }
 
     #[test]
     fn test_base_counts() {
-        let string =
-            "AGCTTTTCATTCTGACTGCAACGGGCAATATGTCTCTGTGTGGATTAAAAAAAGAGTGTCTGATAGCAGC".to_string();
-        let seq = Dna::parse_string(&string);
-        let answer = base_counts(seq);
+        let seq = DNA::parse_string(
+            &"AGCTTTTCATTCTGACTGCAACGGGCAATATGTCTCTGTGTGGATTAAAAAAAGAGTGTCTGATAGCAGC".to_string(),
+        );
+        let answer = base_counts(&seq);
         let answer = [
             answer.get(&DnaNucleotide::A).unwrap().to_owned(),
             answer.get(&DnaNucleotide::C).unwrap().to_owned(),

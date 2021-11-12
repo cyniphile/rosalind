@@ -3,5 +3,6 @@
 members = [
 	"problems-rs",
 	"bio-lib-rs",
+	"bio-lib-algebraic-rs",
 	"bio-lib-string-rs"
 ]
