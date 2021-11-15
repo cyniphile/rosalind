@@ -1,3 +1,5 @@
+#![feature(test)]
+extern crate test;
 use bio_lib_rs::*;
 
 fn get_prob_dominant_phenotype(n_homo_dom: i32, n_hetero: i32, n_homo_recess: i32) -> f32 {
@@ -87,7 +89,32 @@ fn main() {
 
 #[cfg(test)]
 mod tests {
-    use crate::get_prob_dominant_phenotype;
+    use crate::*;
+    use test::Bencher;
+    use bio_lib_algebraic_rs::StringParsable;
+    use bio_lib_algebraic_rs::{DNA, find_reverse_palindromes as find_reverse_palindromes_alg};
+    use bio_lib_string_rs::{
+        find_reverse_palindromes as find_reverse_palindromes_str, 
+        read_test_string_file, skip_first_line
+    };
+
+    #[bench]
+    fn bench_palindrome_str(b: &mut Bencher) {
+        // let seq = read_test_string_file("../test-data/rosalind_revp.txt");
+        // let seq = skip_first_line(seq);
+        let seq = read_test_string_file("../test-data/benchmark-data/revp-large.txt");
+        b.iter(|| find_reverse_palindromes_str(&seq));
+    }
+
+    #[bench]
+    fn bench_palindrome_alg(b: &mut Bencher) {
+        // let seq = read_test_string_file("../test-data/rosalind_revp.txt");
+        // let seq = skip_first_line(seq);
+        let seq = read_test_string_file("../test-data/benchmark-data/revp-large.txt");
+        let seq = DNA::parse_string(&seq);
+        b.iter(|| find_reverse_palindromes_alg(&seq));
+    }
+
 
     #[test]
     fn test_get_prob_dominant_phenotype() {

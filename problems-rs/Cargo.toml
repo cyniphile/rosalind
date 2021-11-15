@@ -7,3 +7,5 @@ edition = "2018"
 
 [dependencies]
 bio-lib-rs = { path = "../bio-lib-rs" }
+bio-lib-string-rs = { path = "../bio-lib-string-rs" }
+bio-lib-algebraic-rs = { path = "../bio-lib-algebraic-rs" }

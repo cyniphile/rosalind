@@ -1,3 +1,4 @@
+#![feature(associated_type_bounds)]
 use std::{collections::HashMap, fs};
 
 #[derive(PartialEq, Eq, Hash)]
@@ -43,6 +44,8 @@ pub enum AminoAcid {
 }
 
 pub type DNA = Vec<DnaNucleotide>;
+pub type DNASlice = [DnaNucleotide];
+pub type RNASlice = [RnaNucleotide];
 pub type RNA = Vec<RnaNucleotide>;
 pub type Protein = Vec<AminoAcid>;
 
@@ -74,12 +77,12 @@ impl Nucleotide for RnaNucleotide {
 }
 
 pub trait StringParsable {
-    fn parse_string(seq: &String) -> Self;
+    fn parse_string(seq: &str) -> Self;
     fn to_string(&self) -> String;
 }
 
 impl StringParsable for DNA {
-    fn parse_string(seq: &String) -> DNA {
+    fn parse_string(seq: &str) -> DNA {
         let parser = |base| match base {
             // TODO: make these bijective maps
             'A' => DnaNucleotide::A,
@@ -104,7 +107,7 @@ impl StringParsable for DNA {
 }
 
 impl StringParsable for RNA {
-    fn parse_string(seq: &String) -> RNA {
+    fn parse_string(seq: &str) -> RNA {
         let parser = |base| match base {
             // TODO: make these bijective maps
             'A' => RnaNucleotide::A,
@@ -129,7 +132,7 @@ impl StringParsable for RNA {
 }
 
 impl StringParsable for Protein {
-    fn parse_string(seq: &String) -> Self {
+    fn parse_string(seq: &str) -> Self {
         let parser = |aa| match aa {
             // TODO: make these bijective maps
             'A' => AminoAcid::A,
@@ -204,7 +207,7 @@ pub fn read_string_file(path: &str) -> String {
 
 //   TODO: do some profiling to compare with 'functional' implementation
 //   https://crates.io/crates/criterion
-pub fn hamming_distance<U: PartialEq>(seq1: &Vec<U>, seq2: &Vec<U>) -> i32 {
+pub fn hamming_distance<U: PartialEq>(seq1: &[U], seq2: &[U]) -> i32 {
     assert_eq!(
         seq1.len(),
         seq2.len(),
@@ -219,7 +222,7 @@ pub fn hamming_distance<U: PartialEq>(seq1: &Vec<U>, seq2: &Vec<U>) -> i32 {
     dist
 }
 
-pub fn hamming_distance_functional<U: PartialEq>(seq1: &Vec<U>, seq2: &Vec<U>) -> i32 {
+pub fn hamming_distance_functional<U: PartialEq>(seq1: &[U], seq2: &[U]) -> i32 {
     assert_eq!(
         seq1.len(),
         seq2.len(),
@@ -301,14 +304,14 @@ fn translate_codon(codon: (&RnaNucleotide, &RnaNucleotide, &RnaNucleotide)) -> A
     }
 }
 
-pub fn translate(rna: &RNA) -> Protein {
+pub fn translate(rna: &RNASlice) -> Protein {
     rna.chunks(3)
         .map(|chunk| (&chunk[0], &chunk[1], &chunk[2]))
         .map(translate_codon)
         .collect()
 }
 
-pub fn transcribe(seq: &DNA) -> RNA {
+pub fn transcribe(seq: &DNASlice) -> RNA {
     let transcribe = |base: &DnaNucleotide| match base {
         DnaNucleotide::A => RnaNucleotide::A,
         DnaNucleotide::C => RnaNucleotide::C,
@@ -318,16 +321,49 @@ pub fn transcribe(seq: &DNA) -> RNA {
     seq.iter().map(transcribe).collect()
 }
 
-pub fn reverse_complement<T: Nucleotide>(seq: &Vec<T>) -> Vec<T> {
+pub fn reverse_complement<T>(seq: &[T]) -> Vec<T>
+where
+    T: Nucleotide,
+{
     seq.iter().rev().map(|base| base.complement()).collect()
 }
 
-pub fn base_counts<T: Eq + std::hash::Hash>(seq: &Vec<T>) -> HashMap<&T, u32> {
+pub fn base_counts<T: Eq + std::hash::Hash>(seq: &[T]) -> HashMap<&T, u32> {
     let mut counts = HashMap::new();
     for item in seq {
-        *counts.entry(item).or_insert(0) += 1 as u32;
+        *counts.entry(item).or_insert(0) += 1;
     }
     counts
+}
+
+pub struct PalindromeLocation {
+    pub start_index: usize,
+    pub length: usize,
+}
+
+pub fn find_reverse_palindromes(seq: &DNASlice) -> Vec<PalindromeLocation> {
+    let min_len = 4;
+    let max_len = 12;
+    let mut locations = Vec::new();
+    for i in 0..(seq.len() - min_len + 1) {
+        for length in (min_len..(max_len + 1)).step_by(2) {
+            if i + length > seq.len() {
+                continue;
+            }
+            let test_seq = &seq[i..(i + length)];
+            if is_reverse_palindrome(test_seq) {
+                locations.push(PalindromeLocation {
+                    start_index: i + 1,
+                    length,
+                })
+            }
+        }
+    }
+    locations
+}
+
+pub fn is_reverse_palindrome(seq: &DNASlice) -> bool {
+    reverse_complement(seq) == seq
 }
 
 #[cfg(test)]

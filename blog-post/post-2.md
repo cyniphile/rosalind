@@ -21,13 +21,11 @@ Rust pattern matching does exhaustivity checking, so since ANY character can be 
 
 ![](2021-11-12-08-45-01.png)
 
-Great, so now if we somehow give a bad string to our function at runtime, the program will panic and crash. For example say we accidentally pass in an RNA string with "U"s in it, uh oohh! We want to check for these errors at compile time, and prevent the possibility of even wiring up `dna_base_complement` to something that passes it the wrong type. 
+Great, so now if we somehow give a bad string to our function at runtime, the program will panic (and crash if the panic isn't unhandled). For example say we accidentally pass in an RNA string with "U"s in it, uh oohh! We want to check for these errors at compile time, and prevent the possibility of even wiring up `dna_base_complement` to something that passes it the wrong type. 
 
-To do this we'll use algebraic data types. I'm not a theoretical expert on this, but bascally there are two algebraic data types: sum types and product types. Product types are just groups that can have more than one type in them. So tuples, structs, or python dataclasses. These are pretty obviously useful: sometimes you need to group diversely typed data about something into one type like a `user` that has a string `name` and int `age`. 
+To do this we'll use algebraic data types. Algebraic data types are simply types composed  of other types. There are two main kinds: sum types and product types. A product types is an AND group of types, for example tuple, `struct`, or a Python dataclass. These are pretty obviously useful: sometimes you need to group diversely typed data together into one type, like a `user` that has a string `name` AND and integer `age`. 
 
-The other common algebraic type, sum types, were new to me, but I've realized they are perhaps more powerful and interesting. Sum types are just types that group together other types. In rust you create sum types with the `enum` keyword. It's kind of like inheritance, but weaker 
-
-For example
+The other common algebraic type, sum types, were new to me, but I've realized they are perhaps even more powerful and interesting[^2]. A sum type is an XOR group of different types, so an instance can be one (and only one) of the given options. It's kind of like inheritance, but simpler. In Rust you create sum types with the `enum` keyword. For example:
 
 ``` rust
 pub enum DnaNucleotide {
@@ -38,7 +36,7 @@ pub enum DnaNucleotide {
 }
 ```
 
-This defines `DnaNucleotide` as a new type that includes the types `A`, `C`, `G`, and `T`. Why is this interesting? Well now we can rewrite our function:
+This defines `DnaNucleotide` as a new type that includes the variants[^3] `A`, `C`, `G`, and `T`. Why is this interesting? Well now we can rewrite our function:
 
 ``` rust
 fn complement(base: DnaNucleotide) -> DnaNucleotide {
@@ -55,7 +53,7 @@ First we can drop the `dna_` prefix from the function name: we know we are getti
 
 ![](2021-11-12-09-45-14.png)
 
-Also if we forget to handle one of the bases, we get a compile time error to really harness the power exhaustivity checking. 
+Also if we forget to handle one of the bases, we get a compile time error to really harness the power of exhaustivity checking. 
 
 ![](2021-11-12-09-40-15.png)
 
@@ -63,10 +61,21 @@ This is even more useful when converting from codons to amino acids. If we forge
 
 ![](2021-11-12-09-49-10.png)
 
-Notce here I've made use of both `RnaNucleotide` and `AminoAcid` enums I've defined elsewhere in the code   
+Notce here I've made use of both `RnaNucleotide` and `AminoAcid` enums I've defined [elsewhere in the code](https://github.com/cyniphile/rosalind/blob/main/bio-lib-algebraic-rs/src/lib.rs). 
 
-- https://www.youtube.com/watch?v=FnBPECrSC7o&ab_channel=JaneStreet
-- enum are a bit tricky because they aren't types
+This is useful for adapting the software to cutting edge biology work in [alloproteins](https://en.wikipedia.org/wiki/Alloprotein#:~:text=An%20alloprotein%20is%20a%20novel,non%2Dnatural%22%20amino%20acids.&text=The%20usual%20mechanisms%2C%20which%20produce,novel%20proteins%20the%20same%20way.) (proteins with non-natural amino acids) or [artificial base pairs](https://en.wikipedia.org/wiki/D5SICS). All you have to do is add another symbol to the "AminoAcid" or "DnaNulceotide" enums, and then a bunch of exhaustivity checking compiler errors will pop up wherever you now need to handle the new entity type. 
+
+## Speed
+
+Python has an Enum type, but Enum support is [not quite ready in pyo3](https://github.com/PyO3/pyo3/issues/834)
+
+roughtly twice as fast, plus our code is more robust.    
+
+This doesn't necessarily come for free. For example we have to read parse any input into this `DnaNucleotide` enum format. I wrote a string parser, which add some overhead. That said, we could also parse this representation from a more efficient format?like what?
+
+- size of enum in memory
+
+- enum are a bit tricky because they aren't true inheritance types. For example this doesn't work
 
 
 
@@ -88,20 +97,15 @@ https://medium.com/@mjschillawski/quick-and-easy-parallelization-in-python-32cb9
 https://docs.google.com/spreadsheets/d/1-lrlYnfcRzlyVbfqHlM74Bpidv4auIxsR-fQR_o-oKo/edit#gid=0
 
 # TODO:
-Python Rust capitalized. RNA DNA built-in,comment all code blocks
-
-- do iters seperately
+- Python Rust capitalized. RNA DNA built-in,comment all code blocks
 - compare with bio python: https://biopython.org/wiki/Seq
-- add rayon NOW just to see how easy it is (can't par replace in python)
 - https://python.land/python-concurrency/python-multiprocessing
+- https://crates.io/crates/multiversion
 
 
-https://crates.io/crates/multiversion
+[^1]: Algebraic data types sort of [exist in Python](https://stackoverflow.com/questions/16258553/how-can-i-define-algebraic-data-types-in-python) but without one key piece of support: pattern matching.
 
----------------
+[^2]: [This talk](https://youtu.be/FnBPECrSC7o?t=1867) by Ron Minsky of Jane Street Capital has some really interesting examples of using algebraic data types to write more robust code (using OCaml in the context of securities trading).
 
-
-
-[^1]: sort of exist in python but without the key piece of support: pattern matching
-   https://stackoverflow.com/questions/16258553/how-can-i-define-algebraic-data-types-in-python
+[^3]: In rust variants of an enum aren't exactly types, so you can't so something like `fn f(s: DnaNucleotide::A) {}`, and thus you can't do inhericants-like things like  
 

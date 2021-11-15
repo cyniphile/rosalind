@@ -13,10 +13,6 @@ name = "bio_lib_string_rs"
 # crate-type = ["cdylib", "rlib"]
 crate-type = ["cdylib", "rlib"]
 
-[dependencies]
-regex = "1.5.4"
-
-
 [dependencies.pyo3]
 version = "0.15.0"
 features = ["extension-module"]

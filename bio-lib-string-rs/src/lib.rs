@@ -2,6 +2,7 @@
 extern crate test;
 use pyo3::prelude::*;
 use std::fs;
+use std::path::PathBuf;
 
 // TODO: Move all test data files to a fixtures folder
 
@@ -19,8 +20,6 @@ pub fn dna_base_complement(base: char) -> char {
         _ => panic!("Non-DNA base \"{}\" found.", base),
     }
 }
-
-
 
 fn translate_codon_to_amino_acid(codon: &[u8]) -> char {
     match codon {
@@ -138,8 +137,8 @@ pub fn find_reverse_palindromes(seq: &str) -> Vec<PalindromeLocation> {
         })
 }
 
-#[pyfunction]
-pub fn find_reverse_palindromes_old(seq: &str) -> Vec<PalindromeLocation> {
+// Original implementation caused GIL deadlock when used with `perfplot`
+pub fn find_reverse_palindromes_str(seq: &str) -> Vec<PalindromeLocation> {
     let min_len = 4;
     let max_len = 12;
     let mut locations = Vec::new();
@@ -181,6 +180,19 @@ pub fn transcribe_dna_to_rna_builtin(dna_seq: &str) -> String {
     dna_seq.replace("T", "U")
 }
 
+pub fn read_test_string_file(path: &str) -> String {
+    let mut d = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
+    d.push(format!("../test-data/{}", path));
+    read_base_string_file(d.to_str().unwrap())
+}
+
+pub fn skip_first_line(s: String) -> String {
+    let mut s = s.lines();
+    s.next();
+    let s: Vec<&str> = s.collect();
+    s.join("")
+}
+
 #[cfg(test)]
 mod tests {
     use crate::*;
@@ -196,54 +208,38 @@ mod tests {
 
     #[bench]
     fn bench_trascribe(b: &mut Bencher) {
-        let mut d = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
-        d.push("../test-data/rosalind_rna.txt");
-        let seq = read_base_string_file(d.to_str().unwrap());
+        let seq = read_test_string_file("rosalind_rna.txt");
         b.iter(|| transcribe_dna_to_rna(&seq));
     }
 
     #[bench]
     fn bench_transcribe_builtin(b: &mut Bencher) {
-        let mut d = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
-        d.push("../test-data/rosalind_rna.txt");
-        let seq = read_base_string_file(d.to_str().unwrap());
+        let seq = read_test_string_file("rosalind_rna.txt");
         b.iter(|| transcribe_dna_to_rna_builtin(&seq));
     }
 
     #[bench]
     fn bench_trascribe_large(b: &mut Bencher) {
-        let mut d = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
-        d.push("../test-data/benchmark-data/rna-large.txt");
-        let seq = read_base_string_file(d.to_str().unwrap());
+        let seq = read_test_string_file("benchmark-data/rna-large.txt");
         b.iter(|| transcribe_dna_to_rna(&seq));
     }
 
     #[bench]
     fn bench_transcribe_builtin_large(b: &mut Bencher) {
-        let mut d = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
-        d.push("../test-data/benchmark-data/rna-large.txt");
-        let seq = read_base_string_file(d.to_str().unwrap());
+        let seq = read_test_string_file("benchmark-data/rna-large.txt");
         b.iter(|| transcribe_dna_to_rna_builtin(&seq));
     }
 
     #[bench]
     fn bench_find_reverse_palindromes(b: &mut Bencher) {
-        let mut d = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
-        d.push("../test-data/rosalind_revp.txt");
-        let path = d.to_str().unwrap();
-        let seq = fs::read_to_string(path).expect("Error");
-        let mut seq = seq.lines();
-        seq.next();
-        let seq: Vec<&str> = seq.collect();
-        let seq = seq.join("");
+        let seq = read_test_string_file("rosalind_revp.txt");
+        let seq = skip_first_line(seq);
         b.iter(|| find_reverse_palindromes(&seq));
     }
 
     #[bench]
     fn bench_find_reverse_palindromes_large(b: &mut Bencher) {
-        let mut d = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
-        d.push("../test-data/benchmark-data/revp-large.txt");
-        let seq = read_base_string_file(d.to_str().unwrap());
+        let seq = read_test_string_file("benchmark-data/revp-large.txt");
         b.iter(|| find_reverse_palindromes(&seq));
     }
 
@@ -282,14 +278,8 @@ mod tests {
             [21, 4],
         ];
         assert_eq!(true_answer, test_answer);
-        let mut d = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
-        d.push("../test-data/rosalind_revp.txt");
-        let path = d.to_str().unwrap();
-        let seq = fs::read_to_string(path).expect("Error");
-        let mut seq = seq.lines();
-        seq.next();
-        let seq: Vec<&str> = seq.collect();
-        let seq = seq.join("");
+        let seq = read_test_string_file("rosalind_revp.txt");
+        let seq = skip_first_line(seq);
         let test_answer = find_reverse_palindromes(&seq);
         let mut d = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
         d.push("../test-data/answer_revp.txt");

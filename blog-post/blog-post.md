@@ -57,7 +57,7 @@ bio_lib_string_rs.transcribe_dna_to_rna(dna)
 This way we can test out the practicality of using Rust incrementally to speed up part of a Python project. Since the Rust version is nicely callable from Python, I can easily wrap them in [pytest benchmarks](https://github.com/cyniphile/rosalind/blob/main/tests/test_benchmark.py). For an initial test I used a small DNA file of ~1000 bp for the following result:
 ![](2021-11-09-17-54-55.png)
 
-Woot. The Rust version is nearly 20x faster[^1], including the overhead of transforming the Python DNA string input to be usable by Rust. If we run a [pure Rust profile on the same data](https://github.com/cyniphile/rosalind/blob/04885c9644e1cff2287a43dce94763e80f482c39/bio-lib-string-rs/src/lib.rs#L195) (no Python involved) it jumps to 50x faster.
+Woot. The Rust version is nearly 20x faster[^1], including the overhead of transforming the Python DNA string input to be usable by Rust. If we run a [pure Rust benchmark on the same data](https://github.com/cyniphile/rosalind/blob/04885c9644e1cff2287a43dce94763e80f482c39/bio-lib-string-rs/src/lib.rs#L195) (no Python involved) it jumps to 50x faster.
 
 ## More Thorough Performance Comparisons
 
@@ -77,7 +77,7 @@ def transcribe_dna_to_rna_builtin(s: str) -> str:
     return s.replace("T", "U")
 ```
 
-Sure, Rust is a lot faster if we compare apples-to-apples implementations of the same algorithm, but it's not quite fair in this case because you'd never actually use that such an algo in Python, or Rust (which also has a built-in `.replace`). So let's also profile the built-ins as well: 
+Sure, Rust is a lot faster if we compare apples-to-apples implementations of the same algorithm, but it's not quite fair in this case because you'd never actually use that such an algo in Python, or Rust (which also has a built-in `.replace`). So let's also benchmark the built-ins as well: 
 
 ``` rust
 // rust built-in
@@ -210,7 +210,7 @@ pub fn dna_base_complement(base: char) -> char {
 }
 ```
 
-And I also added a small Python wrapper to map the Rust `PalindromeLocation` `struct` to the Python `dataclass`, which adds even more overhead.
+And I also added a small Python wrapper to map the Rust `PalindromeLocation` `struct` to the Python `dataclass`, which adds even more overhead[^7].
 
 ``` python
 def find_reverse_palindromes_rs(seq: str) -> List[PalindromeLocation]:
@@ -245,9 +245,11 @@ Rust is about 15x faster than base Python, even with all the conversion overhead
 
 [^2]: Perhaps this is because CPython is compiled with gcc, [which can sometimes emit faster instructions than Rust's LLVM-based compiler](https://news.ycombinator.com/item?id=20944403). Or perhaps something else; I didn't look into it too closely.
 
+[^7]: We could define the Python dataclass [purely in Rust](https://depth-first.com/articles/2020/08/10/python-extensions-in-pure-rust-with-pyo3/), but I wanted to simulate the effect of adding Rust to an existing Python project, where maybe you don't want to move a class definition to Rust. 
+
 [^6]: Yes, I know, this is not the best algorithm. That's not the point. The point is to compare the same algo in Rust and Python. Side note: I wanted to try out Python 3.10's new [pattern matching](https://www.python.org/dev/peps/pep-0636/), but I could not install some of my dependencies (SciPy) and it still seems unstable, so I had to go back to 3.9.
 
-[^5]: This was the first time I ran into not-so-nice problems with PyO3. I started with a Rust implementation [nearly identical to the Python one](https://github.com/cyniphile/rosalind/blob/04885c9644e1cff2287a43dce94763e80f482c39/bio-lib-string-rs/src/lib.rs#L139) but I ran into a weird GIL deadlock when profiling with `perfplot` (which apparently does some multithreaded stuff). I managed to resolve this by not having any `mut` or borrowed variables in the function body, but this was a quick hack fix. I have not yet gone deep on the [GIL and mutability](https://pyo3.rs/v0.15.0/types.html?highlight=gil#gil-lifetimes-mutability-and-python-object-types) w.r.t. PyO3.
+[^5]: This was the first time I ran into not-so-nice problems with PyO3. I started with a Rust implementation [nearly identical to the Python one](https://github.com/cyniphile/rosalind/blob/04885c9644e1cff2287a43dce94763e80f482c39/bio-lib-string-rs/src/lib.rs#L139) but I ran into a weird GIL deadlock when benchmarking with `perfplot` (which apparently does some multithreaded stuff). I managed to resolve this by not having any `mut` or borrowed variables in the function body, but this was a quick hack fix. I have not yet gone deep on the [GIL and mutability](https://pyo3.rs/v0.15.0/types.html?highlight=gil#gil-lifetimes-mutability-and-python-object-types) w.r.t. PyO3.
 
 [^4]: What about pypy? I didn't try it because it still just [don't seem ready.](https://scikit-learn.org/stable/faq.html#do-you-support-pypy) 
 
