@@ -99,6 +99,7 @@ pub fn translate_rna_to_amino_acids(rna: &str) -> String {
 }
 
 #[pyclass]
+#[derive(Debug)]
 pub struct PalindromeLocation {
     #[pyo3(get, set)]
     pub start_index: usize,
@@ -142,6 +143,9 @@ pub fn find_reverse_palindromes_str(seq: &str) -> Vec<PalindromeLocation> {
     let min_len = 4;
     let max_len = 12;
     let mut locations = Vec::new();
+    if seq.len() < min_len {
+        return vec![];
+    };
     for i in 0..(seq.len() - min_len + 1) {
         for length in (min_len..(max_len + 1)).step_by(2) {
             if i + length > seq.len() {
@@ -261,6 +265,9 @@ mod tests {
 
     #[test]
     fn test_find_reverse_palindromes() {
+        // Ensure they work even for small sized input
+        // assert_eq!(find_reverse_palindromes_str("A").len(), 0);
+        // assert_eq!(find_reverse_palindromes("A").len(), 0);
         let seq = "TCAATGCATGCGGGTCTATATGCAT";
         let test_answer = find_reverse_palindromes(seq);
         let test_answer: Vec<[usize; 2]> = test_answer
@@ -277,6 +284,13 @@ mod tests {
             [20, 6],
             [21, 4],
         ];
+        assert_eq!(true_answer, test_answer);
+        let seq = "TCAATGCATGCGGGTCTATATGCAT";
+        let test_answer = find_reverse_palindromes_str(seq);
+        let test_answer: Vec<[usize; 2]> = test_answer
+            .iter()
+            .map(|p| [p.start_index, p.length])
+            .collect();
         assert_eq!(true_answer, test_answer);
         let seq = read_test_string_file("rosalind_revp.txt");
         let seq = skip_first_line(seq);

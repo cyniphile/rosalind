@@ -1,7 +1,8 @@
 #![feature(associated_type_bounds)]
+use core::fmt;
 use std::{collections::HashMap, fs};
 
-#[derive(PartialEq, Eq, Hash)]
+#[derive(PartialEq, Eq, Hash, Debug)]
 pub enum DnaNucleotide {
     A,
     C,
@@ -16,6 +17,12 @@ pub enum RnaNucleotide {
     C,
     G,
     U,
+}
+
+impl fmt::Display for DnaNucleotide {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{}", DNA::to_char(self))
+    }
 }
 
 #[derive(PartialEq, Eq, Hash)]
@@ -77,11 +84,14 @@ impl Nucleotide for RnaNucleotide {
 }
 
 pub trait StringParsable {
+    type T;
     fn parse_string(seq: &str) -> Self;
     fn to_string(&self) -> String;
+    fn to_char(b: &Self::T) -> char;
 }
 
 impl StringParsable for DNA {
+    type T = DnaNucleotide;
     fn parse_string(seq: &str) -> DNA {
         let parser = |base| match base {
             // TODO: make these bijective maps
@@ -93,20 +103,21 @@ impl StringParsable for DNA {
         };
         seq.chars().map(parser).collect()
     }
-    fn to_string(&self) -> String {
-        fn parser(base: &DnaNucleotide) -> char {
-            match base {
-                DnaNucleotide::A => 'A',
-                DnaNucleotide::C => 'C',
-                DnaNucleotide::G => 'G',
-                DnaNucleotide::T => 'T',
-            }
+    fn to_char(base: &DnaNucleotide) -> char {
+        match base {
+            DnaNucleotide::A => 'A',
+            DnaNucleotide::C => 'C',
+            DnaNucleotide::G => 'G',
+            DnaNucleotide::T => 'T',
         }
-        self.iter().map(parser).collect()
+    }
+    fn to_string(&self) -> String {
+        self.iter().map(Self::to_char).collect()
     }
 }
 
 impl StringParsable for RNA {
+    type T = RnaNucleotide;
     fn parse_string(seq: &str) -> RNA {
         let parser = |base| match base {
             // TODO: make these bijective maps
@@ -118,20 +129,21 @@ impl StringParsable for RNA {
         };
         seq.chars().map(parser).collect()
     }
-    fn to_string(&self) -> String {
-        fn parser(base: &RnaNucleotide) -> char {
-            match base {
-                RnaNucleotide::A => 'A',
-                RnaNucleotide::C => 'C',
-                RnaNucleotide::G => 'G',
-                RnaNucleotide::U => 'U',
-            }
+    fn to_char(base: &RnaNucleotide) -> char {
+        match base {
+            RnaNucleotide::A => 'A',
+            RnaNucleotide::C => 'C',
+            RnaNucleotide::G => 'G',
+            RnaNucleotide::U => 'U',
         }
-        self.iter().map(parser).collect()
+    }
+    fn to_string(&self) -> String {
+        self.iter().map(Self::to_char).collect()
     }
 }
 
 impl StringParsable for Protein {
+    type T = AminoAcid;
     fn parse_string(seq: &str) -> Self {
         let parser = |aa| match aa {
             // TODO: make these bijective maps
@@ -160,33 +172,33 @@ impl StringParsable for Protein {
         };
         seq.chars().map(parser).collect()
     }
-    fn to_string(&self) -> String {
-        fn parser(aa: &AminoAcid) -> char {
-            match aa {
-                AminoAcid::Stop => '|',
-                AminoAcid::V => 'V',
-                AminoAcid::Y => 'Y',
-                AminoAcid::W => 'W',
-                AminoAcid::T => 'T',
-                AminoAcid::S => 'S',
-                AminoAcid::P => 'P',
-                AminoAcid::F => 'F',
-                AminoAcid::M => 'M',
-                AminoAcid::K => 'K',
-                AminoAcid::L => 'L',
-                AminoAcid::I => 'I',
-                AminoAcid::H => 'H',
-                AminoAcid::G => 'G',
-                AminoAcid::E => 'E',
-                AminoAcid::Q => 'Q',
-                AminoAcid::C => 'C',
-                AminoAcid::D => 'D',
-                AminoAcid::N => 'N',
-                AminoAcid::R => 'R',
-                AminoAcid::A => 'A',
-            }
+    fn to_char(aa: &AminoAcid) -> char {
+        match aa {
+            AminoAcid::Stop => '|',
+            AminoAcid::V => 'V',
+            AminoAcid::Y => 'Y',
+            AminoAcid::W => 'W',
+            AminoAcid::T => 'T',
+            AminoAcid::S => 'S',
+            AminoAcid::P => 'P',
+            AminoAcid::F => 'F',
+            AminoAcid::M => 'M',
+            AminoAcid::K => 'K',
+            AminoAcid::L => 'L',
+            AminoAcid::I => 'I',
+            AminoAcid::H => 'H',
+            AminoAcid::G => 'G',
+            AminoAcid::E => 'E',
+            AminoAcid::Q => 'Q',
+            AminoAcid::C => 'C',
+            AminoAcid::D => 'D',
+            AminoAcid::N => 'N',
+            AminoAcid::R => 'R',
+            AminoAcid::A => 'A',
         }
-        self.iter().map(parser).collect()
+    }
+    fn to_string(&self) -> String {
+        self.iter().map(Self::to_char).collect()
     }
 }
 
@@ -345,6 +357,9 @@ pub fn find_reverse_palindromes(seq: &DNASlice) -> Vec<PalindromeLocation> {
     let min_len = 4;
     let max_len = 12;
     let mut locations = Vec::new();
+    if seq.len() < min_len {
+        return vec![];
+    };
     for i in 0..(seq.len() - min_len + 1) {
         for length in (min_len..(max_len + 1)).step_by(2) {
             if i + length > seq.len() {

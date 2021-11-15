@@ -70,8 +70,9 @@ This is useful for adapting the software to cutting edge biology work in [allopr
 Python has an Enum type, but Enum support is [not quite ready in pyo3](https://github.com/PyO3/pyo3/issues/834)
 
 roughtly twice as fast, plus our code is more robust.    
+Used the very nice [Criterion](https://github.com/bheisler/criterion.rs) package for Rust.
 
-This doesn't necessarily come for free. For example we have to read parse any input into this `DnaNucleotide` enum format. I wrote a string parser, which add some overhead. That said, we could also parse this representation from a more efficient format?like what?
+This doesn't necessarily come for free. For example we have to read parse any input into this `DnaNucleotide` enum format. I wrote a string parser, which add some overhead. That said, we could also parse this representation from a more efficient format. UTF-8 takes 8 bits, while true bp encoding would only need 2. 
 
 - size of enum in memory
 
