@@ -9,8 +9,8 @@ For example, in the second Rosalind [problem](http://rosalind.info/problems/rna/
 
 ``` python
 # python hand-rolled
-def transcribe_dna_to_rna(s: str) -> str:
-    return ''.join(["U" if char == 'T' else char for char in s])
+def transcribe(dna: str) -> str:
+    return ''.join(["U" if char == 'T' else char for char in dna])
 ```
 
 # Level 2: Rust
@@ -36,8 +36,8 @@ The Rust implementation is pretty similar to the Python one (especially since we
 ``` rust
 // rust hand rolled
 #[pyfunction]
-fn transcribe_dna_to_rna(dna_seq: &str) -> String {
-    dna_seq
+fn transcribe(dna: &str) -> String {
+    dna
         .chars()
         .map(|x| if x == 'T' { 'U' } else { x })
         .collect()
@@ -51,7 +51,7 @@ Additionally, I added the decorator-looking `#[pyfunction]` thing (actually a Ru
 import bio_lib_string_rs
 
 dna = "ACTGACTC"
-bio_lib_string_rs.transcribe_dna_to_rna(dna)
+bio_lib_string_rs.transcribe(dna)
 ```
 
 This way we can test out the practicality of using Rust incrementally to speed up part of a Python project. Since the Rust version is nicely callable from Python, I can easily wrap them in [pytest benchmarks](https://github.com/cyniphile/rosalind/blob/main/tests/test_benchmark.py). For an initial test I used a small DNA file of ~1000 bp for the following result:
@@ -65,16 +65,16 @@ Now some of you Pythonistas might be foaming at the mouth and swearing at your s
 
  ``` python
 # python hand-rolled 
-def transcribe_dna_to_rna(s: str) -> str:
-    return ''.join(["U" if char == 'T' else char for char in s])
+def transcribe(dna: str) -> str:
+    return ''.join(["U" if char == 'T' else char for char in dna])
 ```
 
 when I could have just used the built-in `.replace` function:
 
 ``` python
 # python built-in
-def transcribe_dna_to_rna_builtin(s: str) -> str:
-    return s.replace("T", "U")
+def transcribe_builtin(dna: str) -> str:
+    return dna.replace("T", "U")
 ```
 
 Sure, Rust is a lot faster if we compare apples-to-apples implementations of the same algorithm, but it's not quite fair in this case because you'd never actually use that such an algo in Python, or Rust (which also has a built-in `.replace`). So let's also benchmark the built-ins as well: 
@@ -82,8 +82,8 @@ Sure, Rust is a lot faster if we compare apples-to-apples implementations of the
 ``` rust
 // rust built-in
 #[pyfunction]
-fn transcribe_dna_to_rna_builtin(dna_seq: &str) -> String {
-    dna_seq.replace("T", "U")
+fn transcribe_builtin(dna: &str) -> String {
+    dna.replace("T", "U")
 }
 ```
 
@@ -94,8 +94,8 @@ And also the Python numpy package built-in:
 # numpy 
 import numpy as np
 
-def transcribe_dna_to_rna_np(s: str) -> str:
-    return str(np.char.replace(s, "T", "U"))  # type: ignore
+def transcribe_np(dna: str) -> str:
+    return str(np.char.replace(dna, "T", "U"))  # type: ignore
 ```
 I also set up some separate benchmarks of the Rust functions called directly in Rust, no Python of PyO3 involved. 
 ![](2021-11-09-18-22-16.png)
@@ -241,7 +241,7 @@ Rust is about 15x faster than base Python, even with all the conversion overhead
 	- The VSCode [rust-analyzer](https://marketplace.visualstudio.com/items?itemName=matklad.rust-analyzer) has a bug where it [shows](https://github.com/rust-analyzer/rust-analyzer/issues/6716) fake [errors](https://stackoverflow.com/questions/65223576/what-does-the-rust-analyzer-error-could-not-resolve-macro-crateformat-args) in PyO3 macros.  
 	-  With PyO3 installed, my project began to show some of Rust's infamous slow compile times (it went from a couple of seconds ~22s).
 
-[^1]: It's important to use the super-optimized (and slow compiling) `--release` flag here, otherwise Rust compiles using the default fast-compiling/slow-performing "debug" settings. Check out the performance difference for `transcribe_dna_to_rna`![](2021-11-09-12-46-33.png)
+[^1]: It's important to use the super-optimized (and slow compiling) `--release` flag here, otherwise Rust compiles using the default fast-compiling/slow-performing "debug" settings. Check out the performance difference for `transcribe`![](2021-11-09-12-46-33.png)
 
 [^2]: Perhaps this is because CPython is compiled with gcc, [which can sometimes emit faster instructions than Rust's LLVM-based compiler](https://news.ycombinator.com/item?id=20944403). Or perhaps something else; I didn't look into it too closely.
 

@@ -138,7 +138,7 @@ pub fn find_reverse_palindromes(seq: &str) -> Vec<PalindromeLocation> {
         })
 }
 
-// Original implementation caused GIL deadlock when used with `perfplot`
+// Original implementation that caused GIL deadlock when used with `perfplot`
 pub fn find_reverse_palindromes_str(seq: &str) -> Vec<PalindromeLocation> {
     let min_len = 4;
     let max_len = 12;
@@ -172,7 +172,7 @@ pub fn reverse_complement_dna(dna_seq: &str) -> String {
 }
 
 #[pyfunction]
-pub fn transcribe_dna_to_rna(dna_seq: &str) -> String {
+pub fn transcribe(dna_seq: &str) -> String {
     dna_seq
         .chars()
         .map(|x| if x == 'T' { 'U' } else { x })
@@ -180,7 +180,7 @@ pub fn transcribe_dna_to_rna(dna_seq: &str) -> String {
 }
 
 #[pyfunction]
-pub fn transcribe_dna_to_rna_builtin(dna_seq: &str) -> String {
+pub fn transcribe_builtin(dna_seq: &str) -> String {
     dna_seq.replace("T", "U")
 }
 
@@ -213,25 +213,25 @@ mod tests {
     #[bench]
     fn bench_trascribe(b: &mut Bencher) {
         let seq = read_test_string_file("rosalind_rna.txt");
-        b.iter(|| transcribe_dna_to_rna(&seq));
+        b.iter(|| transcribe(&seq));
     }
 
     #[bench]
     fn bench_transcribe_builtin(b: &mut Bencher) {
         let seq = read_test_string_file("rosalind_rna.txt");
-        b.iter(|| transcribe_dna_to_rna_builtin(&seq));
+        b.iter(|| transcribe_builtin(&seq));
     }
 
     #[bench]
     fn bench_trascribe_large(b: &mut Bencher) {
         let seq = read_test_string_file("benchmark-data/rna-large.txt");
-        b.iter(|| transcribe_dna_to_rna(&seq));
+        b.iter(|| transcribe(&seq));
     }
 
     #[bench]
     fn bench_transcribe_builtin_large(b: &mut Bencher) {
         let seq = read_test_string_file("benchmark-data/rna-large.txt");
-        b.iter(|| transcribe_dna_to_rna_builtin(&seq));
+        b.iter(|| transcribe_builtin(&seq));
     }
 
     #[bench]
@@ -250,9 +250,9 @@ mod tests {
     #[test]
     fn test_transcribe() {
         let seq = "GATGGAACTTGACTACGTAAATT".to_string();
-        let answer = transcribe_dna_to_rna(&seq);
+        let answer = transcribe(&seq);
         assert_eq!(answer, "GAUGGAACUUGACUACGUAAAUU");
-        let answer = transcribe_dna_to_rna_builtin(&seq);
+        let answer = transcribe_builtin(&seq);
         assert_eq!(answer, "GAUGGAACUUGACUACGUAAAUU");
     }
 
@@ -309,8 +309,8 @@ mod tests {
 
 #[pymodule]
 fn bio_lib_string_rs(_py: Python, m: &PyModule) -> PyResult<()> {
-    m.add_function(wrap_pyfunction!(transcribe_dna_to_rna, m)?)?;
-    m.add_function(wrap_pyfunction!(transcribe_dna_to_rna_builtin, m)?)?;
+    m.add_function(wrap_pyfunction!(transcribe, m)?)?;
+    m.add_function(wrap_pyfunction!(transcribe_builtin, m)?)?;
     m.add_function(wrap_pyfunction!(find_reverse_palindromes, m)?)?;
     m.add_class::<PalindromeLocation>()?;
     Ok(())

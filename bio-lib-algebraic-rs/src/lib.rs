@@ -333,6 +333,15 @@ pub fn transcribe(seq: &DNASlice) -> RNA {
     seq.iter().map(transcribe).collect()
 }
 
+// cargo asm was not working with pyo3 modules, so reproducing some string
+// functions here
+pub fn transcribe_str(dna_seq: &str) -> String {
+    dna_seq
+        .chars()
+        .map(|x| if x == 'T' { 'U' } else { x })
+        .collect()
+}
+
 pub fn reverse_complement<T>(seq: &[T]) -> Vec<T>
 where
     T: Nucleotide,
@@ -351,6 +360,54 @@ pub fn base_counts<T: Eq + std::hash::Hash>(seq: &[T]) -> HashMap<&T, u32> {
 pub struct PalindromeLocation {
     pub start_index: usize,
     pub length: usize,
+}
+
+// cargo asm was not working with pyo3 modules, so reproducing some string
+// functions here
+pub fn find_reverse_palindromes_str(seq: &str) -> Vec<PalindromeLocation> {
+    let min_len = 4;
+    let max_len = 12;
+    let mut locations = Vec::new();
+    if seq.len() < min_len {
+        return vec![];
+    };
+    for i in 0..(seq.len() - min_len + 1) {
+        for length in (min_len..(max_len + 1)).step_by(2) {
+            if i + length > seq.len() {
+                continue;
+            }
+            let test_seq = &seq[i..(i + length)];
+            if is_reverse_palindrome_str(test_seq) {
+                locations.push(PalindromeLocation {
+                    start_index: i + 1,
+                    length,
+                })
+            }
+        }
+    }
+    locations
+}
+
+// cargo asm was not working with pyo3 modules, so reproducing some string
+// functions here
+pub fn is_reverse_palindrome_str(seq: &str) -> bool {
+    seq == reverse_complement_dna_str(seq)
+}
+
+// cargo asm was not working with pyo3 modules, so reproducing some string
+// functions here
+pub fn reverse_complement_dna_str(dna_seq: &str) -> String {
+    dna_seq.chars().rev().map(dna_base_complement).collect()
+}
+
+pub fn dna_base_complement(base: char) -> char {
+    match base {
+        'A' => 'T',
+        'T' => 'A',
+        'G' => 'C',
+        'C' => 'G',
+        _ => panic!("Non-DNA base \"{}\" found.", base),
+    }
 }
 
 pub fn find_reverse_palindromes(seq: &DNASlice) -> Vec<PalindromeLocation> {

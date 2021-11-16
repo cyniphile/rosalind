@@ -227,7 +227,7 @@ fn trascribe_base(base: &DnaNucleotide) -> RnaNucleotide {
 // Can't make return type RnaIter because type alias locks to a concrete type
 // and so can't be used with different closures.
 // https://stackoverflow.com/questions/57937436/how-to-alias-an-impl-trait
-pub fn transcribe_dna_to_rna<'a>(seq: DnaIter<'a>) -> impl Iterator<Item = RnaNucleotide> + 'a
+pub fn transcribe<'a>(seq: DnaIter<'a>) -> impl Iterator<Item = RnaNucleotide> + 'a
 where
     DnaIter<'a>: 'a,
 {
@@ -376,11 +376,11 @@ mod tests {
     fn test_convert() {
         let string = "GATGGAACTTGACTACGTAAATT";
         let seq = Dna::parse_string(string);
-        let answer: Rna = transcribe_dna_to_rna(seq).collect();
+        let answer: Rna = transcribe(seq).collect();
         let answer = answer.to_string();
         assert_eq!(answer, "GAUGGAACUUGACUACGUAAAUU");
         let seq = Dna::parse_string(string);
-        let answer = transcribe_dna_to_rna(seq).translate();
+        let answer = transcribe(seq).translate();
         let _: Protein = answer.collect();
     }
 

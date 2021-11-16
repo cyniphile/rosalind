@@ -56,16 +56,16 @@ def dna_base_complement(base: str) -> str:
         raise Exception("Non-DNA base \"{}\" found.".format(base))
 
 
-def transcribe_dna_to_rna_builtin(s: str) -> str:
-    return s.replace("T", "U")
+def transcribe_builtin(dna: str) -> str:
+    return dna.replace("T", "U")
 
 
-def transcribe_dna_to_rna(s: str) -> str:
-    return ''.join(["U" if char == 'T' else char for char in s])
+def transcribe(dna: str) -> str:
+    return ''.join(["U" if char == 'T' else char for char in dna])
 
 
-def transcribe_dna_to_rna_np(s: str) -> str:
-    return str(np.char.replace(s, "T", "U"))  # type: ignore
+def transcribe_np(dna: str) -> str:
+    return str(np.char.replace(dna, "T", "U"))  # type: ignore
 
 
 def find_reverse_palindromes_rs(seq: str) -> List[PalindromeLocation]:
