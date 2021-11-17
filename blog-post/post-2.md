@@ -75,19 +75,15 @@ To find out, we'll just benchmark everything using the excellent [criterion](htt
 
 ![](Schermata-2021-11-16-alle-15.51.28.png)
 
-It looiks like Rust's promise of "zero-cost abstractions" is is a lie, we are actually getting negative cost abstractions here! Even including parsing, the ADT version of our fuction is over twice as fast as the string version. The Rust compiler takes advantage of the `enum` representation to make some key optimization (though I couldn't really see what these optimizations actually are when comparing the emitted assembly code between the two functions. I leave that as an excercise for the reader 😃). 
+It looiks like Rust's promise of "zero-cost abstractions" is is a lie, we are actually getting _negative_ cost abstractions here! Even including parsing overhead, the ADT version of our fuction is over twice as fast as the string version. The Rust compiler clearly takes advantage of the `enum` representation to make some key optimizations (though I couldn't really see what these optimizations actually are when comparing the [emitted assembly and LLVM IR](https://github.com/cyniphile/rosalind/blob/main/bio-lib-algebraic-rs/asm_output/find_reverse_palindromes_adt.asm) of the two functions. I leave that as an excercise for the reader 😃). 
 
 
-
-- size of enum in memory
-
-- enum are a bit tricky because they aren't true inheritance types. For example this doesn't work
 
 Python has an Enum type, but Enum support is [not quite ready in pyo3](https://github.com/PyO3/pyo3/issues/834)
 
 
 
-[^1]: Algebraic data types sort of [exist in Python](https://stackoverflow.com/questions/16258553/how-can-i-define-algebraic-data-types-in-python) but without one key piece of support: pattern matching.
+[^1]: Algebraic data types sort-of [exist in Python](https://stackoverflow.com/questions/16258553/how-can-i-define-algebraic-data-types-in-python) but without one key piece of support: pattern matching.
 
 [^2]: [This talk](https://youtu.be/FnBPECrSC7o?t=1867) by Ron Minsky of Jane Street Capital has some really interesting examples of using algebraic data types to write more robust code (using OCaml in the context of securities trading).
 

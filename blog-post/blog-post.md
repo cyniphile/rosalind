@@ -77,7 +77,7 @@ def transcribe_builtin(dna: str) -> str:
     return dna.replace("T", "U")
 ```
 
-Sure, Rust is a lot faster if we compare apples-to-apples implementations of the same algorithm, but it's not quite fair in this case because you'd never actually use that such an algo in Python, or Rust (which also has a built-in `.replace`). So let's also benchmark the built-ins as well: 
+Sure, Rust is a lot faster if we compare apples-to-apples implementations of the same algorithm, but it's not quite fair in this case because you'd never actually use that such an algo in Python, or Rust (which also has a built-in `.replace`). So let's also [benchmark the built-ins](https://github.com/cyniphile/rosalind/blob/main/tests/test_benchmark.py) as well: 
 
 ``` rust
 // rust built-in
@@ -97,12 +97,12 @@ import numpy as np
 def transcribe_np(dna: str) -> str:
     return str(np.char.replace(dna, "T", "U"))  # type: ignore
 ```
-I also set up some separate benchmarks of the Rust functions called directly in Rust, no Python of PyO3 involved. 
+I also set up some [separate benchmarks](https://github.com/cyniphile/rosalind/blob/f8f0c3b89a34f269cdbce05e74fed93c198ace35/bio-lib-string-rs/src/lib.rs#L213) of the Rust functions called directly in Rust, no Python of PyO3 involved. 
 ![](2021-11-09-18-22-16.png)
 
 The python built-in `.replace` function is actually the fastest by far, over twice as fast as my Rust function and the Rust `.replace` built-in. 
 
-This sort of makes sense since Python's `.replace` is actually just [a highly optimized C function](https://github.com/python/cpython/blob/main/Objects/stringlib/replace.h), though it's still surprising that the Rust `.replace` built-in is so slow [^2]. 
+This sort of makes sense since Python's `.replace` is actually just [a highly optimized C function](https://github.com/python/cpython/blob/5f9247e36a0213b0dcfd43533db5cf6570895cfd/Objects/stringlib/transmogrify.h#L678), though it's still surprising that the Rust `.replace` built-in is a lot slower[^2]. 
 
 The same ranking holds true over different sizes of data, though numpy seems to eventually overcome some fixed initialization overhead. 
 ![](2021-11-09-17-27-36.png)
@@ -244,6 +244,7 @@ Rust is about 15x faster than base Python, even with all the conversion overhead
 [^1]: It's important to use the super-optimized (and slow compiling) `--release` flag here, otherwise Rust compiles using the default fast-compiling/slow-performing "debug" settings. Check out the performance difference for `transcribe`![](2021-11-09-12-46-33.png)
 
 [^2]: Perhaps this is because CPython is compiled with gcc, [which can sometimes emit faster instructions than Rust's LLVM-based compiler](https://news.ycombinator.com/item?id=20944403). Or perhaps something else; I didn't look into it too closely.
+ <!-- [@Jgavris](https://github.com/jgavris) pointed out the Rust replace is copy-based while Python does an  -->
 
 [^7]: We could define the Python dataclass [purely in Rust](https://depth-first.com/articles/2020/08/10/python-extensions-in-pure-rust-with-pyo3/), but I wanted to simulate the effect of adding Rust to an existing Python project, where maybe you don't want to move a class definition to Rust. 
 

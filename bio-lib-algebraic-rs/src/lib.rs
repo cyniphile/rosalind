@@ -1,4 +1,3 @@
-#![feature(associated_type_bounds)]
 use core::fmt;
 use std::{collections::HashMap, fs};
 
@@ -213,10 +212,6 @@ pub fn read_string_file(path: &str) -> String {
     file.to_uppercase().trim().to_string()
 }
 
-//   TODO: using a named tuple struct added some complexity to the ownership stucture.
-//   For now just using simple 3-ples
-// struct Codon(RnaNucleotide, RnaNucleotide, RnaNucleotide);
-
 //   TODO: do some profiling to compare with 'functional' implementation
 //   https://crates.io/crates/criterion
 pub fn hamming_distance<U: PartialEq>(seq1: &[U], seq2: &[U]) -> i32 {
@@ -245,6 +240,10 @@ pub fn hamming_distance_functional<U: PartialEq>(seq1: &[U], seq2: &[U]) -> i32 
         .zip(seq2)
         .fold(0, |acc, (x, y)| if x != y { acc + 1 } else { acc })
 }
+
+//   TODO: using a named tuple struct added some complexity to the ownership stucture.
+//   For now just using simple 3-ples
+// struct Codon(RnaNucleotide, RnaNucleotide, RnaNucleotide);
 
 fn translate_codon(codon: (&RnaNucleotide, &RnaNucleotide, &RnaNucleotide)) -> AminoAcid {
     use RnaNucleotide::*;
@@ -334,7 +333,7 @@ pub fn transcribe(seq: &DNASlice) -> RNA {
 }
 
 // cargo asm was not working with pyo3 modules, so reproducing some string
-// functions here
+// functions here for comparison of assembly code
 pub fn transcribe_str(dna_seq: &str) -> String {
     dna_seq
         .chars()
@@ -363,7 +362,7 @@ pub struct PalindromeLocation {
 }
 
 // cargo asm was not working with pyo3 modules, so reproducing some string
-// functions here
+// functions here for comparison of assembly code
 pub fn find_reverse_palindromes_str(seq: &str) -> Vec<PalindromeLocation> {
     let min_len = 4;
     let max_len = 12;
@@ -389,13 +388,13 @@ pub fn find_reverse_palindromes_str(seq: &str) -> Vec<PalindromeLocation> {
 }
 
 // cargo asm was not working with pyo3 modules, so reproducing some string
-// functions here
+// functions here for comparison of assembly code
 pub fn is_reverse_palindrome_str(seq: &str) -> bool {
     seq == reverse_complement_dna_str(seq)
 }
 
 // cargo asm was not working with pyo3 modules, so reproducing some string
-// functions here
+// functions here for comparison of assembly code
 pub fn reverse_complement_dna_str(dna_seq: &str) -> String {
     dna_seq.chars().rev().map(dna_base_complement).collect()
 }
