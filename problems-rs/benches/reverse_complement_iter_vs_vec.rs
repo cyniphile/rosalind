@@ -21,30 +21,30 @@ pub fn criterion_benchmark(c: &mut Criterion) {
                 let _: Dna = reverse_complement_iter(i).collect();
             })
         });
-        group.bench_with_input(
-            BenchmarkId::new("Vec multiple", str_dna.len()),
-            &str_dna,
-            |b, i| {
-                b.iter(|| {
-                    let i = DNA::parse_string(i);
-                    let one = reverse_complement_vec(&i);
-                    let two = reverse_complement_vec(&one);
-                    let _: DNA = reverse_complement_vec(&two);
-                })
-            },
-        );
-        group.bench_with_input(
-            BenchmarkId::new("Iter multiple", str_dna.len()),
-            &str_dna,
-            |b, i| {
-                b.iter(|| {
-                    let i = Dna::parse_string(i);
-                    let one = reverse_complement_iter(i);
-                    let two = reverse_complement_iter(one);
-                    let _: Dna = reverse_complement_iter(two).collect();
-                })
-            },
-        );
+        // group.bench_with_input(
+        //     BenchmarkId::new("Vec multiple", str_dna.len()),
+        //     &str_dna,
+        //     |b, i| {
+        //         b.iter(|| {
+        //             let i = DNA::parse_string(i);
+        //             let one = reverse_complement_vec(&i);
+        //             let two = reverse_complement_vec(&one);
+        //             let _: DNA = reverse_complement_vec(&two);
+        //         })
+        //     },
+        // );
+        // group.bench_with_input(
+        //     BenchmarkId::new("Iter multiple", str_dna.len()),
+        //     &str_dna,
+        //     |b, i| {
+        //         b.iter(|| {
+        //             let i = Dna::parse_string(i);
+        //             let one = reverse_complement_iter(i);
+        //             let two = reverse_complement_iter(one);
+        //             let _: Dna = reverse_complement_iter(two).collect();
+        //         })
+        //     },
+        // );
     }
     group.finish();
 }

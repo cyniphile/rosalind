@@ -1,10 +1,11 @@
 #![feature(type_alias_impl_trait)]
 #![feature(generic_associated_types)]
+use core::fmt;
 
 // TODO: set up profiling and parallelize with Rayon
 use std::{collections::HashMap, fs};
 
-#[derive(PartialEq, Eq, Hash)]
+#[derive(PartialEq, Eq, Hash, Debug)]
 pub enum DnaNucleotide {
     A,
     C,
@@ -19,6 +20,12 @@ pub enum RnaNucleotide {
     C,
     G,
     U,
+}
+
+impl fmt::Display for DnaNucleotide {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{}", Dna::to_char(self))
+    }
 }
 
 #[derive(PartialEq, Eq, Hash)]
@@ -87,29 +94,27 @@ pub trait StringParsable {
     // TODO: should be way to have default implementations of parse/to _string
     // So far causing type problems
     fn parse_string(seq: &str) -> Self::Iter<'_>;
-    fn parse_char(c: &char) -> Self::Item;
     fn to_string(&self) -> String;
-    fn to_char(c: &Self::Item) -> char;
+    fn to_char(base: &Self::Item) -> char;
 }
 
 impl StringParsable for Dna {
     type Item = DnaNucleotide;
     type Iter<'a> = DnaIter<'a>;
-    fn parse_char(c: &char) -> Self::Item {
-        match c {
+
+    fn parse_string(seq: &str) -> DnaIter {
+        let parser = |base| match base {
             // TODO: make these bijective maps
             'A' => DnaNucleotide::A,
             'C' => DnaNucleotide::C,
             'G' => DnaNucleotide::G,
             'T' => DnaNucleotide::T,
-            _ => panic!("\"{}\" is not a recognized DNA base.", c),
-        }
+            _ => panic!("\"{}\" is not a recognized DNA base.", base),
+        };
+        seq.chars().map(parser)
     }
-    fn parse_string(seq: &str) -> DnaIter {
-        seq.chars().map(|c| Self::parse_char(&c))
-    }
-    fn to_char(c: &DnaNucleotide) -> char {
-        match c {
+    fn to_char(base: &DnaNucleotide) -> char {
+        match base {
             DnaNucleotide::A => 'A',
             DnaNucleotide::C => 'C',
             DnaNucleotide::G => 'G',
@@ -125,28 +130,25 @@ impl StringParsable for Dna {
 impl StringParsable for Rna {
     type Item = RnaNucleotide;
     type Iter<'a> = RnaIter<'a>;
-    fn parse_char(c: &char) -> Self::Item {
-        match c {
+    fn parse_string(seq: &str) -> RnaIter {
+        let parser = |base| match base {
             // TODO: make these bijective maps
             'A' => RnaNucleotide::A,
             'C' => RnaNucleotide::C,
             'G' => RnaNucleotide::G,
             'U' => RnaNucleotide::U,
-            _ => panic!("\"{}\" is not a recognized RNA base.", c),
-        }
+            _ => panic!("\"{}\" is not a recognized RNA base.", base),
+        };
+        seq.chars().map(parser)
     }
-    fn parse_string(seq: &str) -> RnaIter {
-        seq.chars().map(|c| Self::parse_char(&c))
-    }
-    fn to_char(c: &Self::Item) -> char {
-        match c {
+    fn to_char(base: &RnaNucleotide) -> char {
+        match base {
             RnaNucleotide::A => 'A',
             RnaNucleotide::C => 'C',
             RnaNucleotide::G => 'G',
             RnaNucleotide::U => 'U',
         }
     }
-
     fn to_string(&self) -> String {
         self.iter().map(Self::to_char).collect()
     }
@@ -155,8 +157,8 @@ impl StringParsable for Rna {
 impl StringParsable for Protein {
     type Item = AminoAcid;
     type Iter<'a> = ProteinIter<'a>;
-    fn parse_char(c: &char) -> Self::Item {
-        match c {
+    fn parse_string(seq: &str) -> ProteinIter {
+        let parser = |aa| match aa {
             // TODO: make these bijective maps
             'A' => AminoAcid::A,
             'R' => AminoAcid::R,
@@ -179,13 +181,11 @@ impl StringParsable for Protein {
             'Y' => AminoAcid::Y,
             'V' => AminoAcid::V,
             '|' => AminoAcid::Stop,
-            _ => panic!("\"{}\" is not a recognized Amino Acid symbol.", c),
-        }
+            _ => panic!("\"{}\" is not a recognized Amino Acid.", aa),
+        };
+        seq.chars().map(parser)
     }
-    fn parse_string(seq: &str) -> ProteinIter {
-        seq.chars().map(|c| Self::parse_char(&c))
-    }
-    fn to_char(aa: &Self::Item) -> char {
+    fn to_char(aa: &AminoAcid) -> char {
         match aa {
             AminoAcid::Stop => '|',
             AminoAcid::V => 'V',

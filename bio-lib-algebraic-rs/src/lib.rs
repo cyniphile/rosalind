@@ -83,14 +83,14 @@ impl Nucleotide for RnaNucleotide {
 }
 
 pub trait StringParsable {
-    type T;
+    type Item;
     fn parse_string(seq: &str) -> Self;
     fn to_string(&self) -> String;
-    fn to_char(b: &Self::T) -> char;
+    fn to_char(base: &Self::Item) -> char;
 }
 
 impl StringParsable for DNA {
-    type T = DnaNucleotide;
+    type Item = DnaNucleotide;
     fn parse_string(seq: &str) -> DNA {
         let parser = |base| match base {
             // TODO: make these bijective maps
@@ -116,7 +116,7 @@ impl StringParsable for DNA {
 }
 
 impl StringParsable for RNA {
-    type T = RnaNucleotide;
+    type Item = RnaNucleotide;
     fn parse_string(seq: &str) -> RNA {
         let parser = |base| match base {
             // TODO: make these bijective maps
@@ -142,7 +142,7 @@ impl StringParsable for RNA {
 }
 
 impl StringParsable for Protein {
-    type T = AminoAcid;
+    type Item = AminoAcid;
     fn parse_string(seq: &str) -> Self {
         let parser = |aa| match aa {
             // TODO: make these bijective maps
