@@ -244,7 +244,7 @@ Rust is about 15x faster than base Python, even with all the conversion overhead
 [^1]: It's important to use the super-optimized (and slow compiling) `--release` flag here, otherwise Rust compiles using the default fast-compiling/slow-performing "debug" settings. Check out the performance difference for `transcribe`![](2021-11-09-12-46-33.png)
 
 [^2]: Perhaps this is because CPython is compiled with gcc, [which can sometimes emit faster instructions than Rust's LLVM-based compiler](https://news.ycombinator.com/item?id=20944403). Or perhaps something else; I didn't look into it too closely.
- <!-- [@Jgavris](https://github.com/jgavris) pointed out the Rust replace is copy-based while Python does an  -->
+ <!-- [@Jgavris](https://github.com/jgavris) pointed out the Rust replace is copy-based while Python does an inplace. Using this Rust lib [could help](https://docs.rs/ascii/1.0.0/ascii/index.html)   -->
 
 [^7]: We could define the Python dataclass [purely in Rust](https://depth-first.com/articles/2020/08/10/python-extensions-in-pure-rust-with-pyo3/), but I wanted to simulate the effect of adding Rust to an existing Python project, where maybe you don't want to move a class definition to Rust. 
 

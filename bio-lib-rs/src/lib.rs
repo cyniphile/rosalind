@@ -353,7 +353,7 @@ impl<I: Iterator<Item = RnaNucleotide>> TranscribeIteratorExt for I {
 
 pub fn reverse_complement<T: Nucleotide>(
     seq: impl Iterator<Item = T> + std::iter::DoubleEndedIterator,
-) -> impl Iterator<Item = T> {
+) -> impl Iterator<Item = T> + std::iter::DoubleEndedIterator {
     seq.rev().map(|base| base.complement())
 }
 

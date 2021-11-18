@@ -2,17 +2,7 @@ use bio_lib_algebraic_rs::StringParsable;
 use bio_lib_algebraic_rs::{find_reverse_palindromes as find_reverse_palindromes_alg, DNA};
 use bio_lib_string_rs::find_reverse_palindromes_str;
 use criterion::{criterion_group, criterion_main, BenchmarkId, Criterion};
-
-use rand::{distributions::Uniform, prelude::Distribution};
-
-// TODO: generating random data should only be done once with data saved to the
-// data/benchmark-data dir. Otherwise benches won't be consistent over time.
-fn generate_random_dna(length: i32) -> String {
-    let letters = ["A", "C", "G", "T"];
-    let mut rng = rand::thread_rng();
-    let u = Uniform::new(0, 4);
-    (0..length).map(|_| letters[u.sample(&mut rng)]).collect()
-}
+use problems_rs::generate_random_dna;
 
 pub fn criterion_benchmark(c: &mut Criterion) {
     let mut group = c.benchmark_group("Reverse Palindromes");

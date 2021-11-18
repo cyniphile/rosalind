@@ -23,7 +23,7 @@ This function actually doesn't compile as is. Rust checks pattern matches for ex
 
 So we have to uncomment that last line, which adds a catch-all case. Now if we somehow give a non-DNA character to our function at runtime, the program will panic (and crash if the panic isn't unhandled). Say we accidentally pass in the RNA character "U"...uh oohh! 
 
-Using Rust's type system we can eliminate the possibility of this kind of error[^1]. Specifically, we'll make use of _Algebraic Data Types_ or ADTs.
+Using Rust's type system we can eliminate the possibility of this kind of error. Specifically, we'll make use of _Algebraic Data Types_ or ADTs.
 
 Algebraic data types are simply types composed of other types. There are two main kinds of ADTs: product types and sum types. A product types is an AND group of types: for example tuples, `struct`s, or Python dataclasses. These are pretty obviously useful: sometimes you need to group diversely typed data together into one type, like a `user` type that has a string `name` AND and integer `age`. 
 
@@ -75,17 +75,28 @@ To find out, we'll just benchmark everything using the excellent [criterion](htt
 
 ![](Schermata-2021-11-16-alle-15.51.28.png)
 
-It looiks like Rust's promise of "zero-cost abstractions" is is a lie, we are actually getting _negative_ cost abstractions here! Even including parsing overhead, the ADT version of our fuction is over twice as fast as the string version. The Rust compiler clearly takes advantage of the `enum` representation to make some key optimizations (though I couldn't really see what these optimizations actually are when comparing the [emitted assembly and LLVM IR](https://github.com/cyniphile/rosalind/blob/main/bio-lib-algebraic-rs/asm_output/find_reverse_palindromes_adt.asm) of the two functions. I leave that as an excercise for the reader 😃). 
+It looiks like Rust's promise of "zero-cost abstractions" is is a lie, we are actually getting _negative_ cost abstractions here! Even including parsing overhead, the ADT version of our fuction is over twice as fast as the string version. The Rust compiler clearly takes advantage of the `enum` representation to make some key optimizations (though I couldn't really tell what these optimizations actually are when comparing the [emitted assembly and LLVM IR](https://github.com/cyniphile/rosalind/blob/main/bio-lib-algebraic-rs/asm_output/find_reverse_palindromes_adt.asm) of the two functions. I leave that as an excercise for the reader 😃). 
 
+## What About Python?
 
-
-Python has an Enum type, but Enum support is [not quite ready in pyo3](https://github.com/PyO3/pyo3/issues/834)
-
-
-
-[^1]: Algebraic data types sort-of [exist in Python](https://stackoverflow.com/questions/16258553/how-can-i-define-algebraic-data-types-in-python) but without one key piece of support: pattern matching.
+ADTs sort-of [exist in Python](https://stackoverflow.com/questions/16258553/how-can-i-define-algebraic-data-types-in-python) (while using mypy typechecking) and it even offers hacky-feeling [exhaustivity checks](https://hakibenita.com/python-mypy-exhaustive-checking). However, Enum support is [not quite ready in PyO3](https://github.com/PyO3/pyo3/issues/834), so it's not yet possible to call enum-based Rust functions from Python, which is a decently big negative w.r.t. the goal of incrementally adding Rust speedups only when necessary.
 
 [^2]: [This talk](https://youtu.be/FnBPECrSC7o?t=1867) by Ron Minsky of Jane Street Capital has some really interesting examples of using algebraic data types to write more robust code (using OCaml in the context of securities trading).
 
-[^3]: In Rust, variants of an enum aren't actually types, so you can't so something like `fn f(s: DnaNucleotide::A) {}`.  
+[^3]: In Rust, variants of an enum aren't actually types, so you can't so something like `fn f(s: DnaNucleotide::A) {}`. You also can't write polymorphic code with enums like so:
+    ```rust
+    enum Nucleotide{
+        RnaNucleotide,
+        DnaNucleotide,
+    }
 
+    fn foo(s: Nucleotide) {s.complement();}
+    ```
+    even if all the variants in the enum implement a `.complement` method. Instead you have to do [some wrapper/destructuring stuff](https://stackoverflow.com/questions/51188460/how-can-i-structure-destructure-an-enum-of-enums) (which is pretty messy) or you have to use [trait bounds](https://doc.rust-lang.org/rust-by-example/generics/bounds.html) like so: 
+    ``` rust
+    pub trait Nucleotide {
+        fn complement(&self) -> Self;
+    }
+
+    fn foo(s: impl Nucleotide) {s.complement();}
+    ```

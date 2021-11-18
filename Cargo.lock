@@ -365,17 +365,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "0ab1bc2a289d34bd04a330323ac98a1b4bc82c9d9fcb1e66b63caa84da26b575"
 
 [[package]]
-name = "p2"
-version = "0.1.0"
-dependencies = [
- "bio-lib-algebraic-rs",
- "bio-lib-rs",
- "bio-lib-string-rs",
- "criterion",
- "rand",
-]
-
-[[package]]
 name = "parking_lot"
 version = "0.11.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -452,6 +441,17 @@ name = "ppv-lite86"
 version = "0.2.15"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "ed0cfbc8191465bed66e1718596ee0b0b35d5ee1f41c5df2189d0fe8bde535ba"
+
+[[package]]
+name = "problems_rs"
+version = "0.1.0"
+dependencies = [
+ "bio-lib-algebraic-rs",
+ "bio-lib-rs",
+ "bio-lib-string-rs",
+ "criterion",
+ "rand",
+]
 
 [[package]]
 name = "proc-macro-hack"

@@ -1,5 +1,5 @@
 [package]
-name = "p2"
+name = "problems_rs"
 version = "0.1.0"
 edition = "2018"
 
@@ -14,4 +14,8 @@ rand = "0.8.4"
 
 [[bench]]
 name = "adt_palindome"
+harness = false
+
+[[bench]]
+name = "reverse_complement_iter_vs_vec"
 harness = false
