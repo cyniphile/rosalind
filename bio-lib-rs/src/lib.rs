@@ -341,11 +341,11 @@ impl<I: Iterator<Item = RnaNucleotide>> Iterator for Translator<I> {
     }
 }
 
-pub trait TranscribeIteratorExt: Iterator<Item = RnaNucleotide> + Sized {
+pub trait TranslateIteratorExt: Iterator<Item = RnaNucleotide> + Sized {
     fn translate(self) -> Translator<Self>;
 }
 
-impl<I: Iterator<Item = RnaNucleotide>> TranscribeIteratorExt for I {
+impl<I: Iterator<Item = RnaNucleotide>> TranslateIteratorExt for I {
     fn translate(self) -> Translator<Self> {
         Translator { inner: self }
     }

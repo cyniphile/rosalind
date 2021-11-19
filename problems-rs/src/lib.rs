@@ -9,3 +9,10 @@ pub fn generate_random_dna(length: i32) -> String {
     let u = Uniform::new(0, 4);
     (0..length).map(|_| letters[u.sample(&mut rng)]).collect()
 }
+
+pub fn generate_random_rna(length: i32) -> String {
+    let letters = ["A", "C", "G", "U"];
+    let mut rng = rand::thread_rng();
+    let u = Uniform::new(0, 4);
+    (0..length).map(|_| letters[u.sample(&mut rng)]).collect()
+}
