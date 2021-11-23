@@ -1,4 +1,10 @@
 use core::fmt;
+use pyo3::prelude::*;
+use rayon::iter::IndexedParallelIterator;
+use rayon::{
+    self,
+    iter::{IntoParallelIterator, ParallelIterator},
+};
 use std::{collections::HashMap, fs};
 
 #[derive(PartialEq, Eq, Hash, Debug)]
@@ -341,6 +347,13 @@ pub fn transcribe_str(dna_seq: &str) -> String {
         .collect()
 }
 
+// wrapper needs to take strings
+#[pyfunction]
+pub fn reverse_complement_dna(seq: &str) -> String {
+    let seq = DNA::parse_string(seq);
+    reverse_complement(&seq).to_string()
+}
+
 pub fn reverse_complement<T>(seq: &[T]) -> Vec<T>
 where
     T: Nucleotide,
@@ -356,8 +369,12 @@ pub fn base_counts<T: Eq + std::hash::Hash>(seq: &[T]) -> HashMap<&T, u32> {
     counts
 }
 
+#[pyclass]
+#[derive(Debug, Clone)]
 pub struct PalindromeLocation {
+    #[pyo3(get, set)]
     pub start_index: usize,
+    #[pyo3(get, set)]
     pub length: usize,
 }
 
@@ -409,6 +426,13 @@ pub fn dna_base_complement(base: char) -> char {
     }
 }
 
+// wrapper needs to take strings
+#[pyfunction]
+pub fn find_reverse_palindroma_dna(seq: &str) -> Vec<PalindromeLocation> {
+    let seq = DNA::parse_string(seq);
+    find_reverse_palindromes(&seq)
+}
+
 pub fn find_reverse_palindromes(seq: &DNASlice) -> Vec<PalindromeLocation> {
     let min_len = 4;
     let max_len = 12;
@@ -431,6 +455,39 @@ pub fn find_reverse_palindromes(seq: &DNASlice) -> Vec<PalindromeLocation> {
         }
     }
     locations
+}
+
+#[pyfunction]
+pub fn find_reverse_palindroma_dna_par(seq: &str) -> Vec<PalindromeLocation> {
+    let seq = DNA::parse_string(seq);
+    find_reverse_palindromes_par(&seq)
+}
+
+pub fn find_reverse_palindromes_par(seq: &DNASlice) -> Vec<PalindromeLocation> {
+    let min_len = 4;
+    let max_len = 12;
+    seq.into_par_iter()
+        .take(seq.len() - min_len + 1)
+        .enumerate()
+        .fold(Vec::new, |mut acc, (i, _)| {
+            for length in (min_len..(max_len + 1)).step_by(2) {
+                if i + length > seq.len() {
+                    continue;
+                }
+                let test_seq = &seq[i..(i + length)];
+                if is_reverse_palindrome(test_seq) {
+                    acc.push(PalindromeLocation {
+                        start_index: i + 1,
+                        length,
+                    });
+                }
+            }
+            acc
+        })
+        .reduce(
+            Vec::new,
+            |a: Vec<PalindromeLocation>, b: Vec<PalindromeLocation>| [a, b].concat(),
+        )
 }
 
 pub fn is_reverse_palindrome(seq: &DNASlice) -> bool {
@@ -500,4 +557,12 @@ mod tests {
         ];
         assert_eq!(answer, [20, 12, 17, 21]);
     }
+}
+
+#[pymodule]
+fn bio_lib_algebraic_rs(_py: Python, m: &PyModule) -> PyResult<()> {
+    m.add_function(wrap_pyfunction!(reverse_complement_dna, m)?)?;
+    m.add_function(wrap_pyfunction!(find_reverse_palindroma_dna, m)?)?;
+    m.add_function(wrap_pyfunction!(find_reverse_palindroma_dna_par, m)?)?;
+    Ok(())
 }

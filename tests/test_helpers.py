@@ -1,3 +1,4 @@
+# type: ignore
 import numpy as np
 from problems_py.stepik_2021.metabolite_annotation.helpers import minimize_all_deltas, setup_test
 import os

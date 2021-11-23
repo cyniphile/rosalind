@@ -91,6 +91,7 @@ fn translate_codon_to_amino_acid(codon: &[u8]) -> char {
     }
 }
 
+#[pyfunction]
 pub fn translate_rna_to_amino_acids(rna: &str) -> String {
     rna.as_bytes()
         .chunks(3)
@@ -167,6 +168,7 @@ pub fn is_reverse_palindrome(seq: &str) -> bool {
     seq == reverse_complement_dna(seq)
 }
 
+#[pyfunction]
 pub fn reverse_complement_dna(dna_seq: &str) -> String {
     dna_seq.chars().rev().map(dna_base_complement).collect()
 }
@@ -312,6 +314,8 @@ fn bio_lib_string_rs(_py: Python, m: &PyModule) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(transcribe, m)?)?;
     m.add_function(wrap_pyfunction!(transcribe_builtin, m)?)?;
     m.add_function(wrap_pyfunction!(find_reverse_palindromes, m)?)?;
+    m.add_function(wrap_pyfunction!(translate_rna_to_amino_acids, m)?)?;
+    m.add_function(wrap_pyfunction!(reverse_complement_dna, m)?)?;
     m.add_class::<PalindromeLocation>()?;
     Ok(())
 }

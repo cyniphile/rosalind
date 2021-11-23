@@ -1,9 +1,14 @@
+from Bio.Seq import Seq
 import numpy.typing as npt
 import numpy as np
 from dataclasses import dataclass
 from typing import List
 import bio_lib_string_rs
+import bio_lib_algebraic_rs
 import pandas as pd
+import ray
+import functools
+import operator
 
 
 def split_sequences_to_columns(sequences: pd.Series) -> pd.DataFrame:
@@ -33,6 +38,35 @@ def find_reverse_palindromes(seq: str) -> List[PalindromeLocation]:
                     PalindromeLocation(start_index=i + 1, length=length)
                 )
     return locations
+
+
+def find_reverse_palindromes_par(seq: str) -> List[PalindromeLocation]:
+    min_len = 4
+    max_len = 12
+    locations = []
+    ray_seq = ray.put(seq)  # type: ignore
+    BATCH_SIZE = 100
+
+    @ray.remote  # type: ignore
+    def is_palindrome(i: int) -> List[PalindromeLocation]:
+        seq = ray.get(ray_seq)  # type: ignore
+        locations_inner = []
+        for i in range(i, i+BATCH_SIZE):
+            for length in range(min_len, max_len + 1, 2):
+                if i + length > len(seq):  # type: ignore
+                    continue
+                test_seq = seq[i:(i + length)]  # type: ignore
+                if is_reverse_palindrome(test_seq):  # type: ignore
+                    locations_inner.append(
+                        PalindromeLocation(start_index=i + 1, length=length)
+                    )
+        return locations_inner
+
+    for i in range(0, len(seq) - min_len + 1, BATCH_SIZE):
+        locations.append(is_palindrome.remote(i))
+    return functools.reduce(  # flatten list of lists
+        operator.iconcat, ray.get(locations), []  # type: ignore
+    )
 
 
 def is_reverse_palindrome(seq: str) -> bool:
@@ -68,7 +102,41 @@ def transcribe_np(dna: str) -> str:
     return str(np.char.replace(dna, "T", "U"))  # type: ignore
 
 
-def find_reverse_palindromes_rs(seq: str) -> List[PalindromeLocation]:
+def reverse_complement_dna_string_rs(seq: Seq) -> Seq:  # type: ignore
+    return Seq(  # type: ignore
+        bio_lib_string_rs.reverse_complement_dna(str(seq))  # type: ignore
+    )
+
+
+def reverse_complement_dna_alg_rs(seq: Seq) -> Seq:  # type: ignore
+    return Seq(  # type: ignore
+        bio_lib_algebraic_rs.reverse_complement_dna(str(seq))  # type: ignore
+    )
+
+
+def find_reverse_palindromes_alg_rs(seq: str) -> List[PalindromeLocation]:
+    ps = bio_lib_algebraic_rs.find_reverse_palindroma_dna(seq)  # type: ignore
+    return [  # type: ignore
+        PalindromeLocation(
+            start_index=p.start_index,  # type: ignore
+            length=p.length  # type: ignore
+        )
+        for p in ps  # type: ignore
+    ]
+
+
+def find_reverse_palindromes_alg_rs_par(seq: str) -> List[PalindromeLocation]:
+    ps = bio_lib_algebraic_rs.find_reverse_palindroma_dna_par(seq)  # type: ignore
+    return [  # type: ignore
+        PalindromeLocation(
+            start_index=p.start_index,  # type: ignore
+            length=p.length  # type: ignore
+        )
+        for p in ps  # type: ignore
+    ]
+
+
+def find_reverse_palindromes_string_rs(seq: str) -> List[PalindromeLocation]:
     ps = bio_lib_string_rs.find_reverse_palindromes(seq)  # type: ignore
     return [  # type: ignore
         PalindromeLocation(

@@ -29,8 +29,9 @@ checksum = "50ae17cabbc8a38a1e3e4c1a6a664e9a09672dc14d0896fa8d865d3a5a446b07"
 name = "bio-lib-algebraic-rs"
 version = "0.1.0"
 dependencies = [
- "bimap",
  "itertools",
+ "pyo3",
+ "rayon",
 ]
 
 [[package]]

@@ -1,3 +1,4 @@
+#  type: ignore
 import numpy as np
 from dataclasses import dataclass
 from typing import List
@@ -76,10 +77,12 @@ def test_transcribe_builtin_large(benchmark, example_dna_large):
 
 def test_palindromes(example_dna):
     a = find_reverse_palindromes_np(example_dna)
-    b = find_reverse_palindromes_rs(example_dna)
+    b = find_reverse_palindromes_string_rs(example_dna)
     c = find_reverse_palindromes(example_dna)
+    d = find_reverse_palindromes_par(example_dna)
     assert(a == b)
     assert(b == c)
+    assert(c == d)
 
 
 def test_find_reverse_palindromes_np(benchmark, example_dna_large):
