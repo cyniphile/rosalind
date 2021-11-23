@@ -45,7 +45,7 @@ def find_reverse_palindromes_par(seq: str) -> List[PalindromeLocation]:
     max_len = 12
     locations = []
     ray_seq = ray.put(seq)  # type: ignore
-    BATCH_SIZE = 100
+    BATCH_SIZE = 1000
 
     @ray.remote  # type: ignore
     def is_palindrome(i: int) -> List[PalindromeLocation]:

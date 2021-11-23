@@ -1,4 +1,4 @@
-Four Levels of (Bioinformatics) Programming: Part 1 
+Four Levels of (Bioinformatics) Programming
 =========================================
 
 # Level 1: Python
@@ -364,10 +364,51 @@ def find_reverse_palindromes_par(seq: str) -> List[PalindromeLocation]:
     return functools.reduce( # flatten list of list
         operator.iconcat, ray.get(locations), []  # type: ignore
     )
-
 ```
-![Yeah baby](2021-11-23-21-54-20.png)
+
+![](2021-11-23-22-47-24.png)
 Yeah baby!
+
+Parellelizing the Rust version turns out to be the first case where implementation is actually easier in Rust, using the excellent [`rayon`](https://github.com/rayon-rs/rayon) package.
+
+```rust
+pub fn find_reverse_palindromes_par(seq: &DNASlice) -> Vec<PalindromeLocation> {
+    let min_len = 4;
+    let max_len = 12;
+    seq.into_par_iter()
+        .take(seq.len() - min_len + 1)
+        .enumerate()
+        .fold(Vec::new, |mut acc, (i, _)| {
+            for length in (min_len..(max_len + 1)).step_by(2) {
+                if i + length > seq.len() {
+                    continue;
+                }
+                let test_seq = &seq[i..(i + length)];
+                if is_reverse_palindrome(test_seq) {
+                    acc.push(PalindromeLocation {
+                        start_index: i + 1,
+                        length,
+                    });
+                }
+            }
+            acc
+        })
+        .reduce(
+            Vec::new,
+            |a: Vec<PalindromeLocation>, b: Vec<PalindromeLocation>| [a, b].concat(),
+        )
+}
+```
+
+It's as simple as changing `.iter` to `.into_par_iter` and adding a `reduce` function at the end to stitch all the asynchronously returned results together. (And of course it needs to be wrapped in a similar Python->string->ADT wrapper. 
+
+So now it's time for the final showdown. How do all these results compare speedwise?
+
+![](2021-11-23-22-01-06.png)
+
+Remember these results are all Python functions. While both parallel implementation are slower for smaller inputs (as expected), the python version is _much_ slower. It eventually returns to being slower than sequential Python (probably because the `BATCH_SIZE` parameter needs some tuning). However Rust's `rayon` performs excellently out of the box.
+
+With this levels of improvement, we've made our code safer AND sped things up nearly two orders of magnitude. The overhead of learning Rust is certainly high, but hey, I'm over that hump! 
 
 # Notes 
 
