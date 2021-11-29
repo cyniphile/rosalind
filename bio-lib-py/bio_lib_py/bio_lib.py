@@ -15,7 +15,7 @@ def split_sequences_to_columns(sequences: pd.Series) -> pd.DataFrame:
     """
     TODO: rather slow, research jax unirep
     """
-    return sequences.apply(lambda x: pd.Series(list(x)))  # type: ignore
+    return sequences.apply(lambda x: pd.Series(list(x))) 
 
 
 @dataclass
@@ -126,7 +126,7 @@ def find_reverse_palindromes_alg_rs(seq: str) -> List[PalindromeLocation]:
 
 
 def find_reverse_palindromes_alg_rs_par(seq: str) -> List[PalindromeLocation]:
-    ps = bio_lib_algebraic_rs.find_reverse_palindroma_dna_par(
+    ps = bio_lib_algebraic_rs(
         seq)  # type: ignore
     return [  # type: ignore
         PalindromeLocation(

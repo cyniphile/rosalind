@@ -21,7 +21,6 @@ numpy = "^1.21.4"
 [tool.poetry.dev-dependencies]
 autopep8 = "^1.5.7"
 pytest-benchmark = "^3.4.1"
-mypy = "^0.910"
 ipdb = "^0.13.9"
 pandas-stubs = "^1.2.0"
 py-spy = "^0.3.10"

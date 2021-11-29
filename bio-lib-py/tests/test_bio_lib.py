@@ -1,5 +1,5 @@
 import pandas as pd
-from bio_lib_py.bio_lib import *
+from bio_lib_py.bio_lib import split_sequences_to_columns, find_reverse_palindromes
 
 
 def test_split_sequences_to_columns():
