@@ -45,7 +45,7 @@ def find_reverse_palindromes_par(seq: str) -> List[PalindromeLocation]:
     max_len = 12
     locations = []
     ray_seq = ray.put(seq)  # type: ignore
-    BATCH_SIZE = 1000
+    BATCH_SIZE = 1000000
 
     @ray.remote  # type: ignore
     def is_palindrome(i: int) -> List[PalindromeLocation]:
@@ -126,7 +126,8 @@ def find_reverse_palindromes_alg_rs(seq: str) -> List[PalindromeLocation]:
 
 
 def find_reverse_palindromes_alg_rs_par(seq: str) -> List[PalindromeLocation]:
-    ps = bio_lib_algebraic_rs.find_reverse_palindroma_dna_par(seq)  # type: ignore
+    ps = bio_lib_algebraic_rs.find_reverse_palindroma_dna_par(
+        seq)  # type: ignore
     return [  # type: ignore
         PalindromeLocation(
             start_index=p.start_index,  # type: ignore

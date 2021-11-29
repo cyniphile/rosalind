@@ -215,7 +215,7 @@ impl StringParsable for Protein {
     }
 }
 
-fn trascribe_base(base: &DnaNucleotide) -> RnaNucleotide {
+fn transcribe_base(base: &DnaNucleotide) -> RnaNucleotide {
     match base {
         DnaNucleotide::A => RnaNucleotide::A,
         DnaNucleotide::C => RnaNucleotide::C,
@@ -231,7 +231,7 @@ pub fn transcribe<'a>(seq: DnaIter<'a>) -> impl Iterator<Item = RnaNucleotide> +
 where
     DnaIter<'a>: 'a,
 {
-    seq.map(|b| trascribe_base(&b))
+    seq.map(|b| transcribe_base(&b))
 }
 
 pub fn read_string_file(path: &str) -> String {
@@ -239,7 +239,7 @@ pub fn read_string_file(path: &str) -> String {
     file.to_uppercase().trim().to_string()
 }
 
-/*TODO: using a named tuple struct added some complexity to the ownership stucture.
+/*TODO: using a named tuple struct added some complexity to the ownership structure.
   For now just using simple 3-ples
 */
 // struct Codon(RnaNucleotide, RnaNucleotide, RnaNucleotide);
@@ -408,7 +408,7 @@ mod tests {
         let answer: Dna = reverse_complement(seq).collect();
         let answer = answer.to_string();
         assert_eq!(answer, "ACCGGGTTTT");
-        let string = "AAAACCCGGU".to_string();
+        let string = "AAAACCCGGT".to_string();
         let seq = Rna::parse_string(&string);
         let answer: Rna = reverse_complement(seq).collect();
         let answer = answer.to_string();
